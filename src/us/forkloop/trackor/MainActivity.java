@@ -5,6 +5,7 @@ import us.forkloop.trackor.db.Tracking.TrackingColumn;
 import us.forkloop.trackor.view.PullableListView;
 import android.app.Activity;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -12,13 +13,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
     final String TAG = getClass().getSimpleName();
-
+    final int TRACKING_NAME_COLUMN_INDEX = 2;
     private DatabaseHelper dbHelper;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,8 +34,9 @@ public class MainActivity extends Activity {
         dbHelper = new DatabaseHelper(this);
         Cursor cursor = dbHelper.getTrackings();
         String[] from = {TrackingColumn.COLUMN_CARRIER};
-        int[] to = {android.R.id.text1};
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, cursor, from, to, 0);
+        int[] to = { R.id.carrier };
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.tracking_record_layout, cursor, from, to, 0);
+        adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
     }
 
@@ -63,5 +66,30 @@ public class MainActivity extends Activity {
     
     private PullableListView getListView() {
         return (PullableListView)findViewById(R.id.list);
+    }
+
+
+
+    private class TrackingViewBinder implements SimpleCursorAdapter.ViewBinder {
+
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+            Log.d(TAG, "" + columnIndex);
+            String carrier = cursor.getString(columnIndex);
+            if (columnIndex == TRACKING_NAME_COLUMN_INDEX) {
+                if (carrier.equals("UPS")) {
+                    view.setBackgroundColor(Color.parseColor("#d35400"));
+                } else if (carrier.equals("Fedex")) {
+                    view.setBackgroundColor(Color.parseColor("#34495e"));
+                } else if (carrier.equals("USPS")) {
+                    view.setBackgroundColor(Color.parseColor("#3498db"));
+                }
+                if ( view instanceof TextView ) {
+                    ((TextView) view).setText(carrier);
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }
