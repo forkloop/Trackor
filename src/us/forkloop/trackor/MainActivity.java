@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -103,6 +104,8 @@ public class MainActivity extends Activity {
                 }
                 if ( view instanceof TextView ) {
                     ((TextView) view).setText(carrier);
+                    Typeface font = Typeface.createFromAsset(getAssets(), "Lato-Reg.ttf");
+                    ((TextView) view).setTypeface(font);
                 }
                 return true;
             }

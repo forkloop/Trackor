@@ -4,11 +4,11 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
     
-	<TextView 
+    <TextView 
 	    android:id="@+id/carrier"
-	    android:layout_width="match_parent"
-	    android:layout_height="80dp"
-	    android:textColor="#FFFFFF"
-	    android:textSize="36sp"
-	    android:gravity="center_vertical" />
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:textColor="#FFFFFF"
+        android:textSize="36sp"
+        android:gravity="center_vertical" />
 </LinearLayout>
