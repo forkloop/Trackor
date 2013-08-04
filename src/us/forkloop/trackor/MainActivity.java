@@ -4,6 +4,8 @@ import us.forkloop.trackor.db.DatabaseHelper;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
 import us.forkloop.trackor.view.PullableListView;
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
@@ -20,11 +24,14 @@ public class MainActivity extends Activity {
     final String TAG = getClass().getSimpleName();
     final int TRACKING_NAME_COLUMN_INDEX = 2;
     private DatabaseHelper dbHelper;
-
+    
+    private Context context;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context = this;
         
         PullableListView listView = getListView();
         listView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
@@ -38,6 +45,7 @@ public class MainActivity extends Activity {
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.tracking_record_layout, cursor, from, to, 0);
         adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new TrackingClickListener());
     }
 
     @Override
@@ -70,6 +78,15 @@ public class MainActivity extends Activity {
 
 
 
+    private class TrackingClickListener implements OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            startActivity(new Intent(context, DetailActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, android.R.anim.slide_out_right);
+        }
+    }
+    
     private class TrackingViewBinder implements SimpleCursorAdapter.ViewBinder {
 
         @Override
