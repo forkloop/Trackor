@@ -28,6 +28,7 @@ public class MainActivity extends Activity {
     private DatabaseHelper dbHelper;
     
     private Context context;
+    private PullableListView listView;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +36,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         context = this;
         
-        PullableListView listView = getListView();
+        listView = getListView();
         listView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
         View header = getLayoutInflater().inflate(R.layout.fillin_view, null);
         listView.addHeaderView(header);
@@ -48,7 +49,9 @@ public class MainActivity extends Activity {
         adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new TrackingClickListener());
-        listView.setOnItemLongClickListener(new TrackingLongClickListener());
+        listView.setOnItemLongClickListener(listView);
+        listView.setOnScrollListener(listView);
+        //listView.setOnItemLongClickListener(new TrackingLongClickListener());
     }
 
     @Override
@@ -95,6 +98,7 @@ public class MainActivity extends Activity {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
+            view.setBackgroundColor(Color.CYAN);
             return true;
         }
         

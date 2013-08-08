@@ -1,14 +1,20 @@
 package us.forkloop.trackor.view;
 
-import us.forkloop.trackor.R;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
-public class PullableListView extends ListView {
+public class PullableListView extends ListView implements OnScrollListener, OnItemLongClickListener {
 
     private final String TAG = getClass().getSimpleName();
     private final int MAX_OVER_SCROLL = 200;
@@ -16,6 +22,11 @@ public class PullableListView extends ListView {
     private LayoutInflater inflater;
     private boolean hasHeader;
     
+    // long click state
+    private boolean isLongClicked;
+    private int position;
+    private Drawable background;
+
     public PullableListView(Context context) {
         super(context);
     }
@@ -43,5 +54,30 @@ public class PullableListView extends ListView {
             setAdapter(getAdapter());
         }
         */
+    }
+
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
+        this.background = view.getBackground();
+        view.setBackground(new ColorDrawable(Color.CYAN));
+        this.position = position;
+        this.isLongClicked = true;
+        return true;
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (this.isLongClicked) {
+            View v = getChildAt(this.position);
+            v.setBackground(this.background);
+            this.isLongClicked = false;
+        }
     }
 }
