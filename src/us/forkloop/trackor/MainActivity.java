@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
@@ -47,6 +48,7 @@ public class MainActivity extends Activity {
         adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new TrackingClickListener());
+        listView.setOnItemLongClickListener(new TrackingLongClickListener());
     }
 
     @Override
@@ -86,6 +88,16 @@ public class MainActivity extends Activity {
             startActivity(new Intent(context, DetailActivity.class));
             overridePendingTransition(R.anim.slide_in_right, android.R.anim.slide_out_right);
         }
+    }
+    
+    private class TrackingLongClickListener implements OnItemLongClickListener {
+
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
+            return true;
+        }
+        
     }
     
     private class TrackingViewBinder implements SimpleCursorAdapter.ViewBinder {
