@@ -2,14 +2,11 @@ package us.forkloop.trackor.view;
 
 import us.forkloop.trackor.R;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -22,8 +19,10 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
     private final int MAX_OVER_SCROLL = 200;
 
     private LayoutInflater inflater;
-    
+    private Context context;
+
     // long click state
+    private View overlay;
     private View longClickedView;
     private boolean isLongClicked;
 
@@ -33,6 +32,7 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
 
     public PullableListView(Context context, AttributeSet attributes) {
         super(context, attributes);
+        this.context = context;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -52,8 +52,8 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         if (!isLongClicked) {
             Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
-            View overlay = view.findViewById(R.id.archive);
-            overlay.setOnClickListener(new ArchiveClickListener());
+            overlay = view.findViewById(R.id.archive);
+            //overlay.setOnClickListener(new ArchiveClickListener());
             overlay.bringToFront();
             view.invalidate();
             longClickedView = view;
@@ -72,9 +72,16 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
         if (isLongClicked) {
             View v = longClickedView.findViewById(R.id.carrier);
             v.bringToFront();
+            //overlay.setOnClickListener(null);
             longClickedView.invalidate();
             isLongClicked = false;
         }
+        hideKeyboard();
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     private class ArchiveClickListener implements OnClickListener {

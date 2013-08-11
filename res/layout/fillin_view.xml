@@ -7,14 +7,14 @@
     <Spinner 
         android:id="@+id/fillin_spinner"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="48dp"
         android:entries="@array/carriers" />
 
     <EditText 
         android:id="@+id/fillin_tnumber"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:inputType="text"
+        android:layout_height="48dp"
+        android:inputType="textCapCharacters"
         android:hint="@string/hint" />
 
 </LinearLayout>

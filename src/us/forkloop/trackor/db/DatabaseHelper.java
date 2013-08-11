@@ -51,10 +51,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         long id = db.insert(TrackingColumn.TABLE_NAME, null, values);
         return id;
     }
-    
+
     public Cursor getTrackings() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.query(TrackingColumn.TABLE_NAME, null, null, null, null, null, null);
+        Cursor c = db.query(TrackingColumn.TABLE_NAME, null, null, null, null, null, TrackingColumn._ID + " DESC");
         return c;
     }
 }

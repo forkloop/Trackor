@@ -1,6 +1,7 @@
 package us.forkloop.trackor;
 
 import us.forkloop.trackor.db.DatabaseHelper;
+import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
 import us.forkloop.trackor.view.PullableListView;
 import android.app.Activity;
@@ -9,25 +10,34 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.CursorAdapter;
+import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity {
 
     final String TAG = getClass().getSimpleName();
     final int TRACKING_NAME_COLUMN_INDEX = 2;
     private DatabaseHelper dbHelper;
+    private Cursor cursor;
+    SimpleCursorAdapter adapter;
     
     private Context context;
+    private Spinner spinner;
     private PullableListView listView;
     
     @Override
@@ -41,17 +51,23 @@ public class MainActivity extends Activity {
         View header = getLayoutInflater().inflate(R.layout.fillin_view, null);
         listView.addHeaderView(header);
 
+        spinner = (Spinner) findViewById(R.id.fillin_spinner);
+        EditText editText = (EditText) findViewById(R.id.fillin_tnumber);
+        editText.clearFocus();
+        //FIXME
+        editText.setImeActionLabel("Add", KeyEvent.KEYCODE_ENTER);
+        editText.setOnEditorActionListener(new AddTrackingEvent());
+
         dbHelper = new DatabaseHelper(this);
-        Cursor cursor = dbHelper.getTrackings();
+        cursor = dbHelper.getTrackings();
         String[] from = {TrackingColumn.COLUMN_CARRIER};
         int[] to = { R.id.carrier };
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, 0);
+        adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new TrackingClickListener());
         listView.setOnItemLongClickListener(listView);
         listView.setOnScrollListener(listView);
-        //listView.setOnItemLongClickListener(new TrackingLongClickListener());
     }
 
     @Override
@@ -93,22 +109,10 @@ public class MainActivity extends Activity {
         }
     }
     
-    private class TrackingLongClickListener implements OnItemLongClickListener {
-
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
-            view.setBackgroundColor(Color.CYAN);
-            return true;
-        }
-        
-    }
-    
     private class TrackingViewBinder implements SimpleCursorAdapter.ViewBinder {
 
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-            Log.d(TAG, "" + columnIndex);
             String carrier = cursor.getString(columnIndex);
             if (columnIndex == TRACKING_NAME_COLUMN_INDEX) {
                 if (carrier.equals("UPS")) {
@@ -123,6 +127,60 @@ public class MainActivity extends Activity {
                     Typeface font = Typeface.createFromAsset(getAssets(), "Lato-Reg.ttf");
                     ((TextView) view).setTypeface(font);
                 }
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private class AddTrackingAsyncTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected void onPostExecute (String result) {
+            Log.d(TAG, "refreshing...");
+            adapter.changeCursor(cursor);
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        protected String doInBackground(String... args) {
+            cursor = dbHelper.getTrackings();
+            return null;
+        }
+
+    }
+
+    private class AddTrackingEvent implements OnEditorActionListener {
+
+        private void requery() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    cursor = dbHelper.getTrackings();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "refreshing...");
+                            adapter.notifyDataSetChanged();
+                            listView.invalidate();
+                        }
+                    });
+                }
+            }).start();
+        }
+
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                String tNumber = v.getText().toString();
+                String carrier = spinner.getSelectedItem().toString();
+                Log.d(TAG, "Adding " + carrier + ": " + tNumber);
+                Tracking t = new Tracking(carrier, tNumber);
+                dbHelper.addTracking(t);
+                v.clearFocus();
+                v.setText("");
+                //requery();
+                (new AddTrackingAsyncTask()).execute(new String[]{""});
                 return true;
             }
             return false;
