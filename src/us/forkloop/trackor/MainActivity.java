@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
         Cursor cursor = dbHelper.getTrackings();
         String[] from = {TrackingColumn.COLUMN_CARRIER};
         int[] to = { R.id.carrier };
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.tracking_record_layout, cursor, from, to, 0);
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, 0);
         adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new TrackingClickListener());

@@ -1,5 +1,6 @@
 package us.forkloop.trackor.view;
 
+import us.forkloop.trackor.R;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -23,9 +24,8 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
     private boolean hasHeader;
     
     // long click state
+    private View longClickedView;
     private boolean isLongClicked;
-    private int position;
-    private Drawable background;
 
     public PullableListView(Context context) {
         super(context);
@@ -59,11 +59,14 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
-        this.background = view.getBackground();
-        view.setBackground(new ColorDrawable(Color.CYAN));
-        this.position = position;
-        this.isLongClicked = true;
+        if (!isLongClicked) {
+            Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
+            View overlay = view.findViewById(R.id.archive);
+            overlay.bringToFront();
+            view.invalidate();
+            longClickedView = view;
+            isLongClicked = true;
+        }
         return true;
     }
 
@@ -74,10 +77,11 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if (this.isLongClicked) {
-            View v = getChildAt(this.position);
-            v.setBackground(this.background);
-            this.isLongClicked = false;
+        if (isLongClicked) {
+            View v = longClickedView.findViewById(R.id.carrier);
+            v.bringToFront();
+            longClickedView.invalidate();
+            isLongClicked = false;
         }
     }
 }

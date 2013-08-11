@@ -4,7 +4,8 @@
     <string name="app_name">Trackor</string>
 	<string name="add">Add</string>
 	<string name="hint">Tracking NO</string>
-	<string-array name="carriers">
+    <string name="archive">Archive</string>
+    <string-array name="carriers">
 	    <item>UPS</item>
 	    <item>Fedex</item>
 	    <item>USPS</item>
