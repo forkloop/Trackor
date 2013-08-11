@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -21,7 +22,6 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
     private final int MAX_OVER_SCROLL = 200;
 
     private LayoutInflater inflater;
-    private boolean hasHeader;
     
     // long click state
     private View longClickedView;
@@ -45,15 +45,6 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
     @Override
     protected void onOverScrolled (int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
         super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
-        /*
-        if ( !hasHeader && scrollY > MAX_OVER_SCROLL - 20 ) {
-            Log.d(TAG, "Adding a header. " + inflater);
-            hasHeader = true;
-            View header = inflater.inflate(R.layout.fillin_view, null);
-            addHeaderView(header);
-            setAdapter(getAdapter());
-        }
-        */
     }
 
 
@@ -62,6 +53,7 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
         if (!isLongClicked) {
             Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
             View overlay = view.findViewById(R.id.archive);
+            overlay.setOnClickListener(new ArchiveClickListener());
             overlay.bringToFront();
             view.invalidate();
             longClickedView = view;
@@ -82,6 +74,14 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
             v.bringToFront();
             longClickedView.invalidate();
             isLongClicked = false;
+        }
+    }
+
+    private class ArchiveClickListener implements OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "clicked " + v);
         }
     }
 }
