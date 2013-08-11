@@ -2,6 +2,8 @@ package us.forkloop.trackor.view;
 
 import us.forkloop.trackor.R;
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,7 +55,7 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
         if (!isLongClicked) {
             Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
             overlay = view.findViewById(R.id.archive);
-            //overlay.setOnClickListener(new ArchiveClickListener());
+            overlay.setOnClickListener(new ArchiveClickListener());
             overlay.bringToFront();
             view.invalidate();
             longClickedView = view;
@@ -72,7 +74,9 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
         if (isLongClicked) {
             View v = longClickedView.findViewById(R.id.carrier);
             v.bringToFront();
+            //pass null as click listener will still consume the click event.
             //overlay.setOnClickListener(null);
+            overlay.setClickable(false);
             longClickedView.invalidate();
             isLongClicked = false;
         }
@@ -89,6 +93,10 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
         @Override
         public void onClick(View v) {
             Log.d(TAG, "clicked " + v);
+            Intent intent = new Intent();
+            intent.setAction("ArchiveTracking");
+            intent.putExtra("id", 1);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }
 }

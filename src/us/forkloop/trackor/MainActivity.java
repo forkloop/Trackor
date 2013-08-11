@@ -5,13 +5,16 @@ import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
 import us.forkloop.trackor.view.PullableListView;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -27,6 +30,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -36,6 +40,7 @@ public class MainActivity extends Activity {
     private Cursor cursor;
     SimpleCursorAdapter adapter;
     
+    private BroadcastReceiver receiver;
     private Context context;
     private Spinner spinner;
     private PullableListView listView;
@@ -45,7 +50,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = this;
-        
+        Log.d(TAG, "context: " + context);
+        Log.d(TAG, "intent start me:" + getIntent().getAction());
+
+        receiver = new TrackorBroadcastReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("ArchiveTracking");
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+
         listView = getListView();
         listView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
         View header = getLayoutInflater().inflate(R.layout.fillin_view, null);
@@ -72,8 +84,21 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         dbHelper.close();
         super.onDestroy();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //LocalBroadcastManager.getInstance(this).registerReceiver(receiver, null);
+    }
+
+    @Override
+    protected void onStop() {
+        //LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        super.onStop();
     }
 
     @Override
@@ -99,6 +124,19 @@ public class MainActivity extends Activity {
     }
 
 
+    private class TrackorBroadcastReceiver extends BroadcastReceiver {
+
+        final String TAG = getClass().getSimpleName();
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.d(TAG, "Receiving " + action);
+            if ("ArchiveTracking".equals(action)) {
+                Toast.makeText(context, "Archiving...", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "" + intent.getIntExtra("id", -1));
+            }
+        }
+    }
 
     private class TrackingClickListener implements OnItemClickListener {
 
