@@ -52,7 +52,7 @@ public class UPSTrack implements Trackable {
                 return sb.toString();
             }
         } catch (Exception e) {
-            Log.d(TAG, e.toString());
+            Log.e(TAG, e.toString());
         } finally {
             conn.disconnect();
         }

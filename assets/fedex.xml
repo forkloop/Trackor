@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns:TrackRequest xmlns:ns="http://fedex.com/ws/track/v8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://fedex.com/ws/track/v8 TrackService_v8.xsd ">
+    <ns:WebAuthenticationDetail>
+        <ns:UserCredential>
+            <ns:Key>pU6oHCIE5qFXyyRO</ns:Key>
+            <ns:Password>2ts99TXSHXkov7F9LiBDCjurq</ns:Password>
+        </ns:UserCredential>
+    </ns:WebAuthenticationDetail>
+    <ns:ClientDetail>
+        <ns:AccountNumber>510087607</ns:AccountNumber>
+        <ns:MeterNumber>100174013</ns:MeterNumber>
+        <ns:IntegratorId/>
+        <ns:Localization>
+            <ns:LanguageCode>EN</ns:LanguageCode>
+            <ns:LocaleCode>us</ns:LocaleCode>
+        </ns:Localization>
+    </ns:ClientDetail>
+    <ns:TransactionDetail>
+        <ns:CustomerTransactionId>Basic_TrackRequest_q0_Internal</ns:CustomerTransactionId>
+        <ns:Localization>
+            <ns:LanguageCode>EN</ns:LanguageCode>
+            <ns:LocaleCode>us</ns:LocaleCode>
+        </ns:Localization>
+    </ns:TransactionDetail>
+    <ns:Version>
+        <ns:ServiceId>trck</ns:ServiceId>
+        <ns:Major>8</ns:Major>
+        <ns:Intermediate>0</ns:Intermediate>
+        <ns:Minor>0</ns:Minor>
+    </ns:Version>
+    <ns:SelectionDetails>
+        <ns:CarrierCode>FDXE</ns:CarrierCode>
+        <ns:PackageIdentifier>
+            <ns:Type>TRACKING_NUMBER_OR_DOORTAG</ns:Type>
+            <ns:Value>%s</ns:Value>
+        </ns:PackageIdentifier>
+    </ns:SelectionDetails>
+    <ns:ProcessingOptions>INCLUDE_DETAILED_SCANS</ns:ProcessingOptions>
+</ns:TrackRequest>

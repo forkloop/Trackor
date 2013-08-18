@@ -1,5 +1,6 @@
 package us.forkloop.trackor;
 
+import us.forkloop.trackor.trackable.FedExTrack;
 import us.forkloop.trackor.trackable.Trackable;
 import us.forkloop.trackor.trackable.UPSTrack;
 import us.forkloop.trackor.trackable.USPSTrack;
@@ -32,7 +33,7 @@ public class DetailActivity extends Activity {
         Intent intent = getIntent();
         String carrier = intent.getStringExtra("carrier");
         if (carrier != null) {
-            //(new CheckStatusAsyncTask()).execute(new String[]{carrier});
+            (new CheckStatusAsyncTask()).execute(new String[]{carrier});
         }
     }
 
@@ -72,10 +73,11 @@ public class DetailActivity extends Activity {
                 trackable = new USPSTrack();
             } else if ("UPS".equals(carrier)) {
                 trackable = new UPSTrack();
-            } else if ("Fedex".equals(carrier)) {
-                return "Coming soon";
+            } else if ("FedEx".equals(carrier)) {
+                // need context to load template from asset folder
+                trackable = new FedExTrack(getApplicationContext());
             } else {
-                return null;
+                return "Unknown carrier: " + carrier;
             }
             String result = trackable.track("");
             return result;

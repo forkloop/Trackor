@@ -158,10 +158,12 @@ public class MainActivity extends Activity {
             if (columnIndex == TRACKING_NAME_COLUMN_INDEX) {
                 if (carrier.equals("UPS")) {
                     view.setBackgroundColor(Color.parseColor("#d35400"));
-                } else if (carrier.equals("Fedex")) {
+                } else if (carrier.equals("FedEx")) {
                     view.setBackgroundColor(Color.parseColor("#34495e"));
                 } else if (carrier.equals("USPS")) {
                     view.setBackgroundColor(Color.parseColor("#3498db"));
+                } else {
+                    view.setBackgroundColor(Color.parseColor("#2ecc71"));
                 }
                 if ( view instanceof TextView ) {
                     ((TextView) view).setText(carrier);
