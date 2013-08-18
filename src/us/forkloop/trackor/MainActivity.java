@@ -142,7 +142,10 @@ public class MainActivity extends Activity {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            startActivity(new Intent(context, DetailActivity.class));
+            Intent intent = new Intent(context, DetailActivity.class);
+            TextView tv = (TextView) view.findViewById(R.id.carrier);
+            intent.putExtra("carrier", tv.getText());
+            startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, android.R.anim.slide_out_right);
         }
     }
