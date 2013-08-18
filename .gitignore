@@ -3,3 +3,4 @@
 bin/
 gen/
 libs/android-support-v4.jar
+*-request.xml

@@ -1,6 +1,8 @@
 package us.forkloop.trackor.view;
 
+import us.forkloop.trackor.MainActivity;
 import us.forkloop.trackor.R;
+import us.forkloop.trackor.util.QuickReturn;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
@@ -28,6 +30,11 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
     private View longClickedView;
     private boolean isLongClicked;
 
+    // scroll state
+    private QuickReturn delegate;
+    private int sPosition;
+    private int sOffset;
+
     public PullableListView(Context context) {
         super(context);
     }
@@ -36,6 +43,10 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
         super(context, attributes);
         this.context = context;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    public void setDelegate(QuickReturn delegate) {
+        this.delegate = delegate;
     }
 
     @Override
@@ -66,11 +77,23 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        // TODO Auto-generated method stub
+        Log.d(TAG, "" + firstVisibleItem + ":" + visibleItemCount + ":" + totalItemCount);
     }
 
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
+        Log.d(TAG, "scrollState: " + scrollState + " position: " + view.getFirstVisiblePosition() + " top: " + view.getChildAt(0).getTop());
+        if (scrollState != OnScrollListener.SCROLL_STATE_IDLE) {
+            int position = view.getFirstVisiblePosition();
+            View v = view.getChildAt(0);
+            int offset = v == null ? 0 : v.getTop();
+            if (sPosition < position || (sPosition == position && offset > sOffset)) {
+                // show the actionbar
+                delegate.toggleActionBar(false);
+            } else {
+                delegate.toggleActionBar(true);
+            }
+        }
         if (isLongClicked) {
             View v = longClickedView.findViewById(R.id.carrier);
             v.bringToFront();

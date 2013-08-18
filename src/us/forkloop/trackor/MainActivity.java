@@ -3,7 +3,9 @@ package us.forkloop.trackor;
 import us.forkloop.trackor.db.DatabaseHelper;
 import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
+import us.forkloop.trackor.util.QuickReturn;
 import us.forkloop.trackor.view.PullableListView;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,7 +34,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements QuickReturn {
 
     final String TAG = getClass().getSimpleName();
     final int TRACKING_NAME_COLUMN_INDEX = 2;
@@ -44,6 +46,7 @@ public class MainActivity extends Activity {
     private Context context;
     private Spinner spinner;
     private PullableListView listView;
+    private ActionBar actionBar;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +61,11 @@ public class MainActivity extends Activity {
         filter.addAction("ArchiveTracking");
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
+        actionBar = getActionBar();
         listView = getListView();
+        // delegate to toggle actionBar
+        listView.setDelegate(this);
+
         listView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
         View header = getLayoutInflater().inflate(R.layout.fillin_view, null);
         listView.addHeaderView(header);
@@ -229,4 +236,14 @@ public class MainActivity extends Activity {
             return false;
         }
     }
+
+    @Override
+    public void toggleActionBar(boolean hide) {
+        if (hide) {
+            actionBar.show();
+        } else {
+            actionBar.hide();
+        }
+    }
+
 }
