@@ -14,21 +14,24 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/TrackorActionBarTheme" >
         <activity
             android:name="us.forkloop.trackor.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme" >
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="us.forkloop.trackor.DetailActivity" >
+        <activity
+            android:name="us.forkloop.trackor.DetailActivity"
+            android:theme="@style/TrackorActionBarNoTitleTheme"
+            android:label="@string/title_activity_detail" >
         </activity>
         <activity
+            android:theme="@style/TrackorActionBarNoTitleTheme"
             android:name="us.forkloop.trackor.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>

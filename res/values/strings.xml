@@ -6,6 +6,7 @@
     <string name="settings">Settings</string>
 	<string name="hint">Tracking NO</string>
     <string name="archive">Archive</string>
+    <string name="title_activity_detail">Detail</string>
     <string-array name="carriers">
 	    <item>UPS</item>
 	    <item>FedEx</item>

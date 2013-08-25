@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/carrier_spinner_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+    
+    <TextView 
+        android:id="@+id/carrier_spinner_tv"
+        android:layout_width="match_parent"
+        android:textSize="20sp"
+        android:gravity="center_vertical"
+        android:layout_height="48dp"
+        />
+
+</LinearLayout>

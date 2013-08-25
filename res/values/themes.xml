@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TrackorActionBarTheme"
+        parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/TrackorActionBar</item>
+    </style>
+
+    <style name="TrackorActionBar"
+        parent="android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/peter_river</item>
+    </style>
+
+    <style name="TrackorActionBarNoTitle"
+        parent="@style/TrackorActionBar">
+        <item name="android:displayOptions">useLogo|showHome</item>
+    </style>
+    
+    <style name="TrackorActionBarNoTitleTheme"
+        parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/TrackorActionBarNoTitle</item>
+    </style>
+</resources>

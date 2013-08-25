@@ -3,7 +3,9 @@ package us.forkloop.trackor;
 import us.forkloop.trackor.db.DatabaseHelper;
 import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
+import us.forkloop.trackor.util.ImageTextAdapter;
 import us.forkloop.trackor.util.QuickReturn;
+import us.forkloop.trackor.util.TypefaceSpan;
 import us.forkloop.trackor.view.PullableListView;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -17,12 +19,15 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -41,7 +46,8 @@ public class MainActivity extends Activity implements QuickReturn {
     private DatabaseHelper dbHelper;
     private Cursor cursor;
     SimpleCursorAdapter adapter;
-    
+    private TrackorApp app;
+
     private BroadcastReceiver receiver;
     private Context context;
     private Spinner spinner;
@@ -51,10 +57,15 @@ public class MainActivity extends Activity implements QuickReturn {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //FIXME
+        requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.activity_main);
+
         context = this;
         Log.d(TAG, "context: " + context);
         Log.d(TAG, "intent start me:" + getIntent().getAction());
+
+        app = TrackorApp.getInstance(context);
 
         receiver = new TrackorBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
@@ -62,6 +73,8 @@ public class MainActivity extends Activity implements QuickReturn {
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
         actionBar = getActionBar();
+        customizeActionBar();
+
         listView = getListView();
         // delegate to toggle actionBar
         listView.setDelegate(this);
@@ -71,8 +84,14 @@ public class MainActivity extends Activity implements QuickReturn {
         listView.addHeaderView(header);
 
         spinner = (Spinner) findViewById(R.id.fillin_spinner);
+        String[] carriers = getResources().getStringArray(R.array.carriers);
+        ImageTextAdapter carrierAdapter = new ImageTextAdapter(context, R.layout.carrier_spinner_row, carriers);
+        spinner.setAdapter(carrierAdapter);
+
         EditText editText = (EditText) findViewById(R.id.fillin_tnumber);
+        editText.setTypeface(app.getTypeface("Gotham-Book.otf"));
         editText.clearFocus();
+
         //FIXME
         editText.setImeActionLabel("Add", KeyEvent.KEYCODE_ENTER);
         editText.setOnEditorActionListener(new AddTrackingEvent());
@@ -246,4 +265,9 @@ public class MainActivity extends Activity implements QuickReturn {
         }
     }
 
+    private void customizeActionBar() {
+        SpannableString s = new SpannableString(getString(R.string.app_name));
+        s.setSpan(new TypefaceSpan(this, "Gotham-Book.otf"), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        actionBar.setTitle(s);
+    }
 }

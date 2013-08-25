@@ -1,5 +1,6 @@
 <resources>
 
     <color name="black_overlay">#66000000</color>
-
+    <color name="peter_river">#3498db</color>
+    <color name="amethyst">#9b59b6</color>
 </resources>
