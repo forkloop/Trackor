@@ -2,6 +2,8 @@ package us.forkloop.trackor;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.LruCache;
 
 public final class TrackorApp {
@@ -30,4 +32,12 @@ public final class TrackorApp {
         return mTypeface;
     }
 
+    synchronized public boolean isConnected() {
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
+    }
 }

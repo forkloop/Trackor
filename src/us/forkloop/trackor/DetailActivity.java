@@ -15,11 +15,13 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DetailActivity extends Activity {
 
     private final String TAG = getClass().getSimpleName();
     private GestureDetectorCompat detector;
+    private TrackorApp app;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +30,17 @@ public class DetailActivity extends Activity {
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        app = TrackorApp.getInstance(getApplicationContext());
         detector = new GestureDetectorCompat(this, new SwipeGestureListener());
         
         Intent intent = getIntent();
         String carrier = intent.getStringExtra("carrier");
         if (carrier != null) {
-            (new CheckStatusAsyncTask()).execute(new String[]{carrier});
+            if (app.isConnected()) {
+                (new CheckStatusAsyncTask()).execute(new String[]{carrier});
+            } else {
+                Toast.makeText(this, "Network disconnected!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

@@ -65,7 +65,7 @@ public class MainActivity extends Activity implements QuickReturn {
         Log.d(TAG, "context: " + context);
         Log.d(TAG, "intent start me:" + getIntent().getAction());
 
-        app = TrackorApp.getInstance(context);
+        app = TrackorApp.getInstance(getApplicationContext());
 
         receiver = new TrackorBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
