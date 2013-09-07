@@ -63,9 +63,9 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        if (!isLongClicked) {
+        // position > 0 is to no-op the long click on header
+        if (!isLongClicked && position > 0) {
             Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
-            //FIXME long click on header view
             overlay = view.findViewById(R.id.archive);
             overlay.setOnClickListener(new ArchiveClickListener());
             overlay.bringToFront();

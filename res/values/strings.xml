@@ -7,9 +7,14 @@
 	<string name="hint">Tracking NO</string>
     <string name="archive">Archive</string>
     <string name="title_activity_detail">Detail</string>
+    <string name="archive_dialog_title">Archive this tracking?</string>
     <string-array name="carriers">
 	    <item>UPS</item>
 	    <item>FedEx</item>
 	    <item>USPS</item>
 	</string-array>
+    <string-array name="show_type">
+        <item>ALL</item>
+        <item>ACTIVE</item>
+    </string-array>
 </resources>

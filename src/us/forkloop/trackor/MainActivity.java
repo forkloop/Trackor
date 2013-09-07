@@ -5,19 +5,24 @@ import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
 import us.forkloop.trackor.util.ImageTextAdapter;
 import us.forkloop.trackor.util.QuickReturn;
+import us.forkloop.trackor.util.RightDrawableOnTouchListener;
 import us.forkloop.trackor.util.TypefaceSpan;
 import us.forkloop.trackor.view.PullableListView;
+import us.forkloop.trackor.view.TrackorDialogFragment;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -27,10 +32,13 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -73,10 +81,10 @@ public class MainActivity extends Activity implements QuickReturn {
         context = this;
         Log.d(TAG, "context: " + context);
         Log.d(TAG, "intent start me:" + getIntent().getAction());
-        
-        setupDrawer();
 
         app = TrackorApp.getInstance(getApplicationContext());
+
+        setupDrawer();
 
         receiver = new TrackorBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
@@ -96,12 +104,19 @@ public class MainActivity extends Activity implements QuickReturn {
 
         spinner = (Spinner) findViewById(R.id.fillin_spinner);
         String[] carriers = getResources().getStringArray(R.array.carriers);
-        ImageTextAdapter carrierAdapter = new ImageTextAdapter(context, R.layout.carrier_spinner_row, carriers);
+        ImageTextAdapter carrierAdapter = new ImageTextAdapter(this, R.layout.carrier_spinner_row, carriers);
         spinner.setAdapter(carrierAdapter);
 
         EditText editText = (EditText) findViewById(R.id.fillin_tnumber);
         editText.setTypeface(app.getTypeface("Gotham-Book.otf"));
         editText.clearFocus();
+        editText.setOnTouchListener(new RightDrawableOnTouchListener(editText) {
+            @Override
+            public boolean onDrawableTouch(MotionEvent event) {
+                Log.d(TAG, "Touch drawable.");
+                return true;
+            }
+        });
 
         //FIXME
         editText.setImeActionLabel("Add", KeyEvent.KEYCODE_ENTER);
@@ -149,6 +164,34 @@ public class MainActivity extends Activity implements QuickReturn {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.actions, menu);
+
+        MenuItem showTypeItem = menu.findItem(R.id.action_showtype);
+        Spinner spinner = (Spinner)showTypeItem.getActionView();
+        String[] showType = getResources().getStringArray(R.array.show_type);
+        ArrayAdapter<String> showTypeAdapter = new ArrayAdapter<String>(this, R.layout.showtype_spinner_row, showType) {
+            @Override
+            public View getView (int position, View convertView, ViewGroup parent) {
+                return customizeView(position, convertView, parent);
+            }
+
+            @Override
+            public View getDropDownView (int position, View convertView, ViewGroup parent) {
+                return customizeView(position, convertView, parent);
+            }
+
+            private View customizeView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    convertView = inflater.inflate(R.layout.showtype_spinner_row, null);
+                }
+                TextView tv = (TextView) convertView.findViewById(R.id.showtype_spinner_entry);
+                tv.setText(getItem(position));
+                tv.setTypeface(app.getTypeface("Gotham-Book.otf"));
+                return convertView;
+            }
+        };
+        spinner.setAdapter(showTypeAdapter);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -177,6 +220,8 @@ public class MainActivity extends Activity implements QuickReturn {
             String action = intent.getAction();
             Log.d(TAG, "Receiving " + action);
             if ("ArchiveTracking".equals(action)) {
+                DialogFragment dialogFragment = new TrackorDialogFragment();
+                dialogFragment.show(getFragmentManager(), "archive");
                 Toast.makeText(context, "Archiving...", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "" + intent.getIntExtra("id", -1));
             }
@@ -295,7 +340,7 @@ public class MainActivity extends Activity implements QuickReturn {
             } else {
                 Log.e(TAG, "Clicked unknown fragment: " + position);
             }
-            
+
             if (fragment != null) {
                 fragment.setArguments(new Bundle());
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -334,8 +379,18 @@ public class MainActivity extends Activity implements QuickReturn {
 
     private void setupDrawer() {
         // The first empty string is accommodating the action bar
-        String[] drawerEntries = new String[] {"", "Settings", "Help", "Feedback"};
+        String[] drawerEntries = new String[] {"", "Settings", "Help", "Feedback", ""};
         drawerListView = (ListView)findViewById(R.id.drawer_list);
+        try {
+            TextView label = (TextView) getLayoutInflater().inflate(R.layout.simple_textview, null);
+            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            label.setText("Version " + version);
+            label.setTypeface(app.getTypeface("Gotham-Book.otf"));
+            label.setClickable(false);
+            drawerListView.addFooterView(label);
+        } catch (NameNotFoundException nfe) {
+            Log.e(TAG, "Can not get package version, ", nfe);
+        }
         drawerListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, drawerEntries));
         drawerListView.setOnItemClickListener(new DrawerClickListener());
     }

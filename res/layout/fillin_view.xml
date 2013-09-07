@@ -6,8 +6,7 @@
 
     <TextView 
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        />
+        android:layout_height="50dp" />
 
     <Spinner 
         android:id="@+id/fillin_spinner"
@@ -19,6 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:inputType="textCapCharacters"
+        android:drawableRight="@android:drawable/ic_menu_camera"
         android:hint="@string/hint" />
 
 </LinearLayout>

@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/detail_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-
-    <TextView 
+    <TextView
         android:id="@+id/detail"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/detail_tracking_list"
+        android:background="@color/clouds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:footerDividersEnabled="true"
+        android:dividerHeight="1dp" />
+
+    <TextView
+        android:id="@+id/archive_button" 
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:text="@string/archive"
+        android:gravity="center"
+        android:background="@color/pomegranate"
+        android:textColor="#FFFFFF"
+        android:textSize="32sp"
+        android:layout_marginTop="30dp"
+        />
 </LinearLayout>

@@ -1,11 +1,17 @@
 package us.forkloop.trackor;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.forkloop.trackor.db.TrackRecord;
 import us.forkloop.trackor.trackable.FedExTrack;
 import us.forkloop.trackor.trackable.Trackable;
 import us.forkloop.trackor.trackable.UPSTrack;
 import us.forkloop.trackor.trackable.USPSTrack;
+import us.forkloop.trackor.util.DetailTrackingAdapter;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,6 +20,8 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,22 +30,28 @@ public class DetailActivity extends Activity {
     private final String TAG = getClass().getSimpleName();
     private GestureDetectorCompat detector;
     private TrackorApp app;
-    
+    private Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        context = this;
+
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         app = TrackorApp.getInstance(getApplicationContext());
         detector = new GestureDetectorCompat(this, new SwipeGestureListener());
-        
+
+        mockTrackingDetail();
+
         Intent intent = getIntent();
         String carrier = intent.getStringExtra("carrier");
         if (carrier != null) {
             if (app.isConnected()) {
-                (new CheckStatusAsyncTask()).execute(new String[]{carrier});
+        //        (new CheckStatusAsyncTask()).execute(new String[]{carrier});
             } else {
                 Toast.makeText(this, "Network disconnected!", Toast.LENGTH_SHORT).show();
             }
@@ -67,8 +81,13 @@ public class DetailActivity extends Activity {
 
         @Override
         protected void onPostExecute (String result) {
-            TextView tv = (TextView) findViewById(R.id.detail);
-            tv.setText(result);
+            if (isTrackingAvailable()) {
+
+            } else {
+                TextView tv = (TextView) findViewById(R.id.detail);
+                tv.setText(result);
+                tv.setVisibility(View.VISIBLE);
+            }
         }
         
         @Override
@@ -90,6 +109,20 @@ public class DetailActivity extends Activity {
             return result;
         }
         
+    }
+
+    private boolean isTrackingAvailable() {
+        return false;
+    }
+
+    private void mockTrackingDetail() {
+        int n = 5;
+        ListView listView = (ListView) findViewById(R.id.detail_tracking_list);
+        List<TrackRecord> records = new ArrayList<TrackRecord>(n);
+        for (int i = 0; i < n; i++) {
+            records.add(new TrackRecord());
+        }
+        listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, records));
     }
 
     private class SwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
