@@ -22,7 +22,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -113,7 +112,8 @@ public class MainActivity extends Activity implements QuickReturn {
         editText.setOnTouchListener(new RightDrawableOnTouchListener(editText) {
             @Override
             public boolean onDrawableTouch(MotionEvent event) {
-                Log.d(TAG, "Touch drawable.");
+                Intent cameraIntent = new Intent(context, CameraActivity.class);
+                startActivity(cameraIntent);
                 return true;
             }
         });

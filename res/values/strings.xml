@@ -8,6 +8,7 @@
     <string name="archive">Archive</string>
     <string name="title_activity_detail">Detail</string>
     <string name="archive_dialog_title">Archive this tracking?</string>
+    <string name="capture">Capture</string>
     <string-array name="carriers">
 	    <item>UPS</item>
 	    <item>FedEx</item>
