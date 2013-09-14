@@ -9,10 +9,12 @@ import us.forkloop.trackor.trackable.Trackable;
 import us.forkloop.trackor.trackable.UPSTrack;
 import us.forkloop.trackor.trackable.USPSTrack;
 import us.forkloop.trackor.util.DetailTrackingAdapter;
+import us.forkloop.trackor.util.TrackorNetworking;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
@@ -21,6 +23,8 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,22 +32,34 @@ import android.widget.Toast;
 public class DetailActivity extends Activity {
 
     private final String TAG = getClass().getSimpleName();
+
+    // TODO width & height
+    private final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=New+York,NY&zoom=15&size=1000x300&sensor=false";
     private GestureDetectorCompat detector;
     private TrackorApp app;
-    private Context context;
+    private ImageView map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        context = this;
-
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        map = (ImageView) findViewById(R.id.map);
+        map.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=New+York,NY&z=18"));
+                startActivity(intent);
+            }
+        });
+
         app = TrackorApp.getInstance(getApplicationContext());
         detector = new GestureDetectorCompat(this, new SwipeGestureListener());
+
+        (new GetMapTask()).execute(MAP_ENDPOINT);
 
         mockTrackingDetail();
 
@@ -76,11 +92,31 @@ public class DetailActivity extends Activity {
         detector.onTouchEvent(event);
         return super.onTouchEvent(event);
     }
-    
+
+    private class GetMapTask extends AsyncTask<String, Void, Void> {
+
+        private Bitmap bitmap;
+
+        @Override
+        protected void onPostExecute(Void v) {
+            map.setImageBitmap(bitmap);
+        }
+
+        @Override
+        protected Void doInBackground(String... args) {
+            if (args.length == 0) {
+                return null;
+            }
+
+            bitmap = new TrackorNetworking().downloadImage(args[0]);
+            return null;
+        }
+    }
+
     private class CheckStatusAsyncTask extends AsyncTask<String, Void, String> {
 
         @Override
-        protected void onPostExecute (String result) {
+        protected void onPostExecute(String result) {
             if (isTrackingAvailable()) {
 
             } else {
@@ -108,7 +144,6 @@ public class DetailActivity extends Activity {
             String result = trackable.track("");
             return result;
         }
-        
     }
 
     private boolean isTrackingAvailable() {

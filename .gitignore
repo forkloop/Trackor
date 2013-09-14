@@ -5,3 +5,4 @@ gen/
 libs/android-support-v4.jar
 *-request.xml
 .DS_Store
+META-INF/

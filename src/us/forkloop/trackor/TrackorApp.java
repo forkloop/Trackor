@@ -1,10 +1,12 @@
 package us.forkloop.trackor;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.LruCache;
+import android.util.TypedValue;
 
 public final class TrackorApp {
 
@@ -30,6 +32,11 @@ public final class TrackorApp {
             sTypefaceCache.put(typeface, mTypeface);
         }
         return mTypeface;
+    }
+
+    public int convertDpToPiexl(int dp) {
+        Resources r = context.getResources();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
     }
 
     synchronized public boolean isConnected() {
