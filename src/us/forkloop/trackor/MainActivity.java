@@ -6,6 +6,7 @@ import us.forkloop.trackor.db.Tracking.TrackingColumn;
 import us.forkloop.trackor.util.ImageTextAdapter;
 import us.forkloop.trackor.util.QuickReturn;
 import us.forkloop.trackor.util.RightDrawableOnTouchListener;
+import us.forkloop.trackor.util.TrackorActions;
 import us.forkloop.trackor.util.TypefaceSpan;
 import us.forkloop.trackor.view.PullableListView;
 import us.forkloop.trackor.view.TrackorDialogFragment;
@@ -78,8 +79,6 @@ public class MainActivity extends Activity implements QuickReturn {
         setContentView(R.layout.activity_main);
 
         context = this;
-        Log.d(TAG, "context: " + context);
-        Log.d(TAG, "intent start me:" + getIntent().getAction());
 
         app = TrackorApp.getInstance(getApplicationContext());
 
@@ -132,6 +131,12 @@ public class MainActivity extends Activity implements QuickReturn {
         listView.setOnItemClickListener(new TrackingClickListener());
         listView.setOnItemLongClickListener(listView);
         listView.setOnScrollListener(listView);
+
+        // started by widget
+        Log.d(TAG, "Started by --> " + getIntent().getAction());
+        if (TrackorActions.CAMERA_ACTION.getAction().equals(getIntent().getAction())) {
+            startActivity(new Intent(context, CameraActivity.class));
+        }
     }
 
     @Override

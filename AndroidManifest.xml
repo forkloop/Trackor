@@ -43,7 +43,15 @@
         <activity
             android:name="us.forkloop.trackor.CameraActivity"
             android:theme="@style/FullscreenTheme" >
-            </activity>
+        </activity>
+        <receiver
+            android:name="us.forkloop.trackor.view.TrackorWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                       android:resource="@xml/appwidget_info" />
+        </receiver>
     </application>
 
 </manifest>
