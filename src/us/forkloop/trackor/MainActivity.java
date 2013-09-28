@@ -257,8 +257,10 @@ public class MainActivity extends Activity implements QuickReturn {
                     view.setBackgroundColor(Color.parseColor("#34495e"));
                 } else if (carrier.equals("USPS")) {
                     view.setBackgroundColor(Color.parseColor("#3498db"));
+                } else if (carrier.equals("LASERSHIP")) {
+                    view.setBackgroundColor(Color.parseColor("#e74c3c"));
                 } else {
-                    view.setBackgroundColor(Color.parseColor("#2ecc71"));
+                    view.setBackgroundColor(Color.parseColor("#9b59b6"));
                 }
                 if ( view instanceof TextView ) {
                     ((TextView) view).setText(carrier);

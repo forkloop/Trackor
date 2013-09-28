@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.forkloop.trackor.db.TrackRecord;
 import us.forkloop.trackor.trackable.FedExTrack;
+import us.forkloop.trackor.trackable.LASERSHIPTrack;
 import us.forkloop.trackor.trackable.Trackable;
 import us.forkloop.trackor.trackable.UPSTrack;
 import us.forkloop.trackor.trackable.USPSTrack;
@@ -59,15 +60,13 @@ public class DetailActivity extends Activity {
         app = TrackorApp.getInstance(getApplicationContext());
         detector = new GestureDetectorCompat(this, new SwipeGestureListener());
 
-        (new GetMapTask()).execute(MAP_ENDPOINT);
-
-        mockTrackingDetail();
+        //mockTrackingDetail();
 
         Intent intent = getIntent();
         String carrier = intent.getStringExtra("carrier");
         if (carrier != null) {
             if (app.isConnected()) {
-        //        (new CheckStatusAsyncTask()).execute(new String[]{carrier});
+                (new CheckStatusAsyncTask()).execute(new String[]{carrier});
             } else {
                 Toast.makeText(this, "Network disconnected!", Toast.LENGTH_SHORT).show();
             }
@@ -122,6 +121,7 @@ public class DetailActivity extends Activity {
             } else {
                 TextView tv = (TextView) findViewById(R.id.detail);
                 tv.setText(result);
+                Log.d(TAG, result);
                 tv.setVisibility(View.VISIBLE);
             }
         }
@@ -138,6 +138,8 @@ public class DetailActivity extends Activity {
             } else if ("FedEx".equals(carrier)) {
                 // need context to load template from asset folder
                 trackable = new FedExTrack(getApplicationContext());
+            } else if ("LASERSHIP".equals(carrier)) {
+                trackable = new LASERSHIPTrack();
             } else {
                 return "Unknown carrier: " + carrier;
             }
@@ -151,6 +153,9 @@ public class DetailActivity extends Activity {
     }
 
     private void mockTrackingDetail() {
+
+        (new GetMapTask()).execute(MAP_ENDPOINT);
+
         int n = 5;
         ListView listView = (ListView) findViewById(R.id.detail_tracking_list);
         List<TrackRecord> records = new ArrayList<TrackRecord>(n);

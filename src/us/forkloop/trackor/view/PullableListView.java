@@ -1,6 +1,5 @@
 package us.forkloop.trackor.view;
 
-import us.forkloop.trackor.MainActivity;
 import us.forkloop.trackor.R;
 import us.forkloop.trackor.util.QuickReturn;
 import android.content.Context;

@@ -1,9 +1,13 @@
 <resources>
-
     <color name="black_overlay">#66000000</color>
     <color name="peter_river">#3498db</color>
     <color name="amethyst">#9b59b6</color>
     <color name="clouds">#ecf0f1</color>
     <color name="pomegranate">#c0392b</color>
     <color name="silver">#bdc3c7</color>
+    <!--  -->
+    <color name="ups">#d35400</color>
+    <color name="fedex">#34495e</color>
+    <color name="lasership">#e74c3c</color>
+    <color name="usps">#2ecc71</color>
 </resources>
