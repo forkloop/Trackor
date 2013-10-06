@@ -7,13 +7,13 @@
 <ImageView 
     android:id="@+id/tracking_record_image"
     android:layout_width="60dp"
-    android:layout_height="60dp"
+    android:layout_height="match_parent"
     />
 
 <LinearLayout
     android:layout_width="0dp"
     android:layout_weight="1"
-    android:layout_height="60dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
@@ -38,7 +38,7 @@
     <TextView
             android:id="@+id/tracking_record_info"
             android:layout_width="match_parent"
-            android:layout_height="35dp"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical" 
             android:paddingLeft="5dp" />
     </LinearLayout>

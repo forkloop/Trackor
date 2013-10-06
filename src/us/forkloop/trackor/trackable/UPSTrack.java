@@ -8,7 +8,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
+import us.forkloop.trackor.util.Event;
 import android.util.Log;
 
 public class UPSTrack implements Trackable {
@@ -24,7 +26,7 @@ public class UPSTrack implements Trackable {
     private final String USER_ID = "forkloop";
     private final String PASSWORD = "";
     @Override
-    public String track(String trackingNumber) {
+    public List<Event> track(String trackingNumber) {
         String body = String.format(TEMPLATE, UPS_TOKEN, USER_ID, PASSWORD, "1Z06R89V9006422981");
         Log.d(TAG, "UPS request body: " + body);
         HttpURLConnection conn = null;
@@ -49,7 +51,7 @@ public class UPSTrack implements Trackable {
                     sb.append(line);
                 }
                 reader.close();
-                return sb.toString();
+                return null;//sb.toString();
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString());

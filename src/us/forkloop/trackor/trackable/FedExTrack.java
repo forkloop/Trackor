@@ -9,7 +9,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
+import us.forkloop.trackor.util.Event;
 import android.content.Context;
 import android.util.Log;
 
@@ -25,7 +27,7 @@ public class FedExTrack implements Trackable {
     }
 
     @Override
-    public String track(String trackingNumber) {
+    public List<Event> track(String trackingNumber) {
         String template = loadTemplate();
         trackingNumber = "9612804882227374518306";
         if (template != null) {
@@ -54,7 +56,7 @@ public class FedExTrack implements Trackable {
                         sb.append(line);
                     }
                     reader.close();
-                    return sb.toString();
+                    return null;//sb.toString();
                 }
             } catch (Exception e) {
                 Log.e(TAG, e.toString());

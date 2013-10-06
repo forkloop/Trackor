@@ -5,7 +5,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
+import us.forkloop.trackor.util.Event;
+import us.forkloop.trackor.util.LASERResponseParser;
 import android.util.Log;
 
 public class LASERSHIPTrack implements Trackable {
@@ -14,7 +17,7 @@ public class LASERSHIPTrack implements Trackable {
     private static final String TAG = "LASERSHIP";
 
     @Override
-    public String track(final String trackingNumber) {
+    public List<Event> track(final String trackingNumber) {
         HttpURLConnection conn = null;
         String mockTrackingNumber = "Q26181478";
         final String endpoint = String.format(ENDPOINT, mockTrackingNumber);
@@ -31,7 +34,12 @@ public class LASERSHIPTrack implements Trackable {
                     sb.append(line);
                 }
                 buffer.close();
-                return sb.toString();
+                String response = sb.toString();
+                if (response != null) {
+                    LASERResponseParser parser = new LASERResponseParser();
+                    parser.parse(response);
+                    return parser.getEvents();
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString());

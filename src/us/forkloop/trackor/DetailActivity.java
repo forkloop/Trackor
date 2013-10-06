@@ -1,15 +1,14 @@
 package us.forkloop.trackor;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import us.forkloop.trackor.db.TrackRecord;
 import us.forkloop.trackor.trackable.FedExTrack;
 import us.forkloop.trackor.trackable.LASERSHIPTrack;
 import us.forkloop.trackor.trackable.Trackable;
 import us.forkloop.trackor.trackable.UPSTrack;
 import us.forkloop.trackor.trackable.USPSTrack;
 import us.forkloop.trackor.util.DetailTrackingAdapter;
+import us.forkloop.trackor.util.Event;
 import us.forkloop.trackor.util.TrackorNetworking;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -27,7 +26,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class DetailActivity extends Activity {
@@ -35,7 +33,7 @@ public class DetailActivity extends Activity {
     private final String TAG = getClass().getSimpleName();
 
     // TODO width & height
-    private final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=New+York,NY&zoom=15&size=1000x300&sensor=false";
+    private final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=15&size=1000x300&sensor=false";
     private GestureDetectorCompat detector;
     private TrackorApp app;
     private ImageView map;
@@ -59,8 +57,6 @@ public class DetailActivity extends Activity {
 
         app = TrackorApp.getInstance(getApplicationContext());
         detector = new GestureDetectorCompat(this, new SwipeGestureListener());
-
-        //mockTrackingDetail();
 
         Intent intent = getIntent();
         String carrier = intent.getStringExtra("carrier");
@@ -112,22 +108,17 @@ public class DetailActivity extends Activity {
         }
     }
 
-    private class CheckStatusAsyncTask extends AsyncTask<String, Void, String> {
+    private class CheckStatusAsyncTask extends AsyncTask<String, Void, List<Event>> {
 
         @Override
-        protected void onPostExecute(String result) {
-            if (isTrackingAvailable()) {
-
-            } else {
-                TextView tv = (TextView) findViewById(R.id.detail);
-                tv.setText(result);
-                Log.d(TAG, result);
-                tv.setVisibility(View.VISIBLE);
+        protected void onPostExecute(List<Event> events) {
+            if (events != null && events.size() > 0) {
+                render(events);
             }
         }
         
         @Override
-        protected String doInBackground(String... args) {
+        protected List<Event> doInBackground(String... args) {
             String carrier = args[0];
             Log.d(TAG, "Start to request status from " + carrier);
             Trackable trackable = null;
@@ -141,28 +132,22 @@ public class DetailActivity extends Activity {
             } else if ("LASERSHIP".equals(carrier)) {
                 trackable = new LASERSHIPTrack();
             } else {
-                return "Unknown carrier: " + carrier;
+                Log.e(TAG, "Unknown carrier " + carrier);
+                return null;
             }
-            String result = trackable.track("");
-            return result;
+            List<Event> events = trackable.track("");
+            return events;
         }
     }
 
-    private boolean isTrackingAvailable() {
-        return false;
-    }
+    private void render(List<Event> events) {
 
-    private void mockTrackingDetail() {
+        String url = String.format(MAP_ENDPOINT, events.get(0).getZipcode());
+        Log.d(TAG, "get map with " + url);
+        (new GetMapTask()).execute(url);
 
-        (new GetMapTask()).execute(MAP_ENDPOINT);
-
-        int n = 5;
         ListView listView = (ListView) findViewById(R.id.detail_tracking_list);
-        List<TrackRecord> records = new ArrayList<TrackRecord>(n);
-        for (int i = 0; i < n; i++) {
-            records.add(new TrackRecord());
-        }
-        listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, records));
+        listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, events));
     }
 
     private class SwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
