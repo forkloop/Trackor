@@ -44,6 +44,7 @@ public class DetailActivity extends Activity {
     private View defaultView;
 
     private String carrier;
+    private String tNumber;
     private boolean isChecking;
 
     @Override
@@ -71,7 +72,7 @@ public class DetailActivity extends Activity {
 
         Intent intent = getIntent();
         carrier = intent.getStringExtra("carrier");
-
+        tNumber = intent.getStringExtra("tnumber");
         check();
     }
 
@@ -124,11 +125,11 @@ public class DetailActivity extends Activity {
     }
 
     private void check() {
-        if (carrier != null && !isChecking) {
+        if (carrier != null && tNumber != null && !isChecking) {
             isChecking = true;
             progressBar.setVisibility(View.VISIBLE);
             if (app.isConnected()) {
-                (new CheckStatusAsyncTask()).execute(new String[]{carrier});
+                (new CheckStatusAsyncTask()).execute(new String[]{carrier, tNumber});
             } else {
                 Toast.makeText(this, "Network disconnected!", Toast.LENGTH_SHORT).show();
             }
@@ -152,7 +153,8 @@ public class DetailActivity extends Activity {
         @Override
         protected List<Event> doInBackground(String... args) {
             String carrier = args[0];
-            Log.d(TAG, "Start to request status from " + carrier);
+            String tNumber = args[1];
+            Log.d(TAG, "Start to request status from " + carrier + " " + tNumber);
             Trackable trackable = null;
             if ("USPS".equals(carrier)) {
                 trackable = new USPSTrack();
@@ -167,7 +169,7 @@ public class DetailActivity extends Activity {
                 Log.e(TAG, "Unknown carrier " + carrier);
                 return null;
             }
-            List<Event> events = trackable.track("");
+            List<Event> events = trackable.track(tNumber);
             return events;
         }
     }

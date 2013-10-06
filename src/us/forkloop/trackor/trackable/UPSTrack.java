@@ -41,8 +41,8 @@ public class UPSTrack implements Trackable {
     private final String USER_ID = "forkloop";
     private final String PASSWORD = "Trackor4UPS";
     @Override
-    public List<Event> track(String trackingNumber) {
-        String body = String.format(TEMPLATE, UPS_TOKEN, USER_ID, PASSWORD, "1Z06R89V9006422981");
+    public List<Event> track(final String trackingNumber) {
+        String body = String.format(TEMPLATE, UPS_TOKEN, USER_ID, PASSWORD, trackingNumber);
         Log.d(TAG, "UPS request body: " + body);
         HttpURLConnection conn = null;
         try {

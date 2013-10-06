@@ -4,7 +4,6 @@ import android.provider.BaseColumns;
 
 public final class Tracking {
 
-    //TODO Lombok
     private static final String DEFAULT_NAME = "package";
     private String carrier;
     private String trackingNumber;

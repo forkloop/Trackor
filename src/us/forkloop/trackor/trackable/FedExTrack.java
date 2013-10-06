@@ -27,11 +27,11 @@ public class FedExTrack implements Trackable {
     }
 
     @Override
-    public List<Event> track(String trackingNumber) {
+    public List<Event> track(final String trackingNumber) {
         String template = loadTemplate();
-        trackingNumber = "9612804882227374518306";
+        String mockTrackingNumber = "9612804882227374518306";
         if (template != null) {
-            String body = String.format(template, trackingNumber);
+            String body = String.format(template, mockTrackingNumber);
             Log.d(TAG, body);
 
             HttpURLConnection conn = null;

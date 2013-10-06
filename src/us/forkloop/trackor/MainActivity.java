@@ -1,5 +1,7 @@
 package us.forkloop.trackor;
 
+import java.util.Locale;
+
 import us.forkloop.trackor.db.DatabaseHelper;
 import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
@@ -123,8 +125,8 @@ public class MainActivity extends Activity implements QuickReturn {
 
         dbHelper = new DatabaseHelper(this);
         cursor = dbHelper.getTrackings();
-        String[] from = {TrackingColumn.COLUMN_CARRIER};
-        int[] to = { R.id.carrier };
+        String[] from = {TrackingColumn.COLUMN_CARRIER, TrackingColumn.COLUMN_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER};
+        int[] to = { R.id.carrier, R.id.tracking_tag, R.id.tracking_number };
         adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
@@ -240,6 +242,8 @@ public class MainActivity extends Activity implements QuickReturn {
             Intent intent = new Intent(context, DetailActivity.class);
             TextView tv = (TextView) view.findViewById(R.id.carrier);
             intent.putExtra("carrier", tv.getText());
+            tv = (TextView) view.findViewById(R.id.tracking_number);
+            intent.putExtra("tnumber", tv.getText());
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, android.R.anim.slide_out_right);
         }
@@ -249,27 +253,26 @@ public class MainActivity extends Activity implements QuickReturn {
 
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-            String carrier = cursor.getString(columnIndex);
+            String text = cursor.getString(columnIndex);
+            if ( view instanceof TextView ) {
+                ((TextView) view).setText(text);
+                Typeface font = Typeface.createFromAsset(getAssets(), "Lato-Reg.ttf");
+                ((TextView) view).setTypeface(font);
+            }
             if (columnIndex == TRACKING_NAME_COLUMN_INDEX) {
-                if (carrier.equals("UPS")) {
+                if (text.equals("UPS")) {
                     view.setBackgroundColor(Color.parseColor("#d35400"));
-                } else if (carrier.equals("FedEx")) {
+                } else if (text.equals("FedEx")) {
                     view.setBackgroundColor(Color.parseColor("#34495e"));
-                } else if (carrier.equals("USPS")) {
+                } else if (text.equals("USPS")) {
                     view.setBackgroundColor(Color.parseColor("#3498db"));
-                } else if (carrier.equals("LASERSHIP")) {
+                } else if (text.equals("LASERSHIP")) {
                     view.setBackgroundColor(Color.parseColor("#e74c3c"));
                 } else {
                     view.setBackgroundColor(Color.parseColor("#9b59b6"));
                 }
-                if ( view instanceof TextView ) {
-                    ((TextView) view).setText(carrier);
-                    Typeface font = Typeface.createFromAsset(getAssets(), "Lato-Reg.ttf");
-                    ((TextView) view).setTypeface(font);
-                }
-                return true;
             }
-            return false;
+            return true;
         }
     }
 

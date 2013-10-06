@@ -20,6 +20,7 @@ import us.forkloop.trackor.util.Event;
 import android.util.Log;
 import android.util.Xml;
 
+// TODO contact USPS service
 public class USPSTrack implements Trackable {
 
     private final String TAG = getClass().getSimpleName();
@@ -28,7 +29,7 @@ public class USPSTrack implements Trackable {
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("MMM dd KK:mm aa");
 
     @Override
-    public List<Event> track(String trackingNumber) {
+    public List<Event> track(final String trackingNumber) {
         HttpURLConnection conn = null;
         try {
             Log.d(TAG, "fetching status for " + trackingNumber);

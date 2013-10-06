@@ -20,7 +20,7 @@ public class LASERSHIPTrack implements Trackable {
     public List<Event> track(final String trackingNumber) {
         HttpURLConnection conn = null;
         String mockTrackingNumber = "Q26181478";
-        final String endpoint = String.format(ENDPOINT, mockTrackingNumber);
+        final String endpoint = String.format(ENDPOINT, trackingNumber);
         try {
             Log.d(TAG, "fetching status for " + trackingNumber);
             final URL url = new URL(endpoint);

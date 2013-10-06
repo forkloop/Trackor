@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="80dp"
-    android:orientation="horizontal" >
+    android:layout_marginBottom="10dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+     >
 
     <TextView
         android:id="@+id/archive"
@@ -13,12 +16,38 @@
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/archive" />
 
-    <TextView
-        android:id="@+id/carrier"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textColor="#FFFFFF"
-        android:textSize="36sp"
-        android:gravity="center_vertical" />
-
-</FrameLayout>
+        android:background="@color/clouds"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/tracking_tag"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:textColor="@color/peter_river"
+            android:textSize="36sp"
+            android:paddingLeft="5dp"
+            android:gravity="center_vertical" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/tracking_number"
+                android:layout_width="0dp"
+                android:layout_weight="0.8"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="5dp"
+                android:textColor="#2c3e50" />
+            <TextView
+                android:id="@+id/carrier"
+                android:layout_width="0dp"
+                android:layout_weight="0.2"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal|center_vertical"
+                android:textColor="#FFFFFF" />
+            </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
