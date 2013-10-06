@@ -21,6 +21,11 @@ public class Event {
         this.info = info;
     }
 
+    @Override
+    public String toString() {
+        return "Event [time=" + time + ", zipcode=" + zipcode + ", location=" + location + ", info=" + info + "]";
+    }
+
     public DateTime getTime() {
         return time;
     }

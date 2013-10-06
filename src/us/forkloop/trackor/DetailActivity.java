@@ -147,8 +147,9 @@ public class DetailActivity extends Activity {
         }
     }
 
+    // TODO fix archive button gone
     private void render(List<Event> events) {
-
+        // TODO fix if zipcode not exists
         String url = String.format(MAP_ENDPOINT, events.get(0).getZipcode());
         Log.d(TAG, "get map with " + url);
         (new GetMapTask()).execute(url);
