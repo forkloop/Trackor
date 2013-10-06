@@ -20,6 +20,8 @@ import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,6 +41,10 @@ public class DetailActivity extends Activity {
     private TrackorApp app;
     private ImageView map;
     private ProgressBar progressBar;
+    private View defaultView;
+
+    private String carrier;
+    private boolean isChecking;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +60,7 @@ public class DetailActivity extends Activity {
         map.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                // FIXME
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=New+York,NY&z=18"));
                 startActivity(intent);
             }
@@ -63,14 +70,16 @@ public class DetailActivity extends Activity {
         detector = new GestureDetectorCompat(this, new SwipeGestureListener());
 
         Intent intent = getIntent();
-        String carrier = intent.getStringExtra("carrier");
-        if (carrier != null) {
-            if (app.isConnected()) {
-                (new CheckStatusAsyncTask()).execute(new String[]{carrier});
-            } else {
-                Toast.makeText(this, "Network disconnected!", Toast.LENGTH_SHORT).show();
-            }
-        }
+        carrier = intent.getStringExtra("carrier");
+
+        check();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.detail_activity, menu);
+        return true;
     }
 
     @Override
@@ -80,6 +89,9 @@ public class DetailActivity extends Activity {
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+            return true;
+        case R.id.action_refresh:
+            check();
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -111,6 +123,18 @@ public class DetailActivity extends Activity {
         }
     }
 
+    private void check() {
+        if (carrier != null && !isChecking) {
+            isChecking = true;
+            progressBar.setVisibility(View.VISIBLE);
+            if (app.isConnected()) {
+                (new CheckStatusAsyncTask()).execute(new String[]{carrier});
+            } else {
+                Toast.makeText(this, "Network disconnected!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private class CheckStatusAsyncTask extends AsyncTask<String, Void, List<Event>> {
 
         @Override
@@ -118,10 +142,11 @@ public class DetailActivity extends Activity {
             if (events != null && events.size() > 0) {
                 render(events);
             } else {
-                View defaultView = findViewById(R.id.default_detail);
+                defaultView = findViewById(R.id.default_detail);
                 defaultView.setVisibility(View.VISIBLE);
             }
             progressBar.setVisibility(View.GONE);
+            isChecking = false;
         }
         
         @Override
@@ -149,6 +174,9 @@ public class DetailActivity extends Activity {
 
     // TODO fix archive button gone
     private void render(List<Event> events) {
+        if (defaultView != null) {
+            defaultView.setVisibility(View.GONE);
+        }
         // TODO fix if zipcode not exists
         String url = String.format(MAP_ENDPOINT, events.get(0).getZipcode());
         Log.d(TAG, "get map with " + url);

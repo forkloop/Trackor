@@ -168,7 +168,7 @@ public class MainActivity extends Activity implements QuickReturn {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.actions, menu);
+        inflater.inflate(R.menu.main_activity, menu);
 
         MenuItem showTypeItem = menu.findItem(R.id.action_showtype);
         Spinner spinner = (Spinner)showTypeItem.getActionView();
