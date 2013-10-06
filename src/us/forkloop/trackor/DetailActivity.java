@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class DetailActivity extends Activity {
@@ -37,6 +38,7 @@ public class DetailActivity extends Activity {
     private GestureDetectorCompat detector;
     private TrackorApp app;
     private ImageView map;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,8 @@ public class DetailActivity extends Activity {
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+
+        progressBar = (ProgressBar) findViewById(R.id.progress);
 
         map = (ImageView) findViewById(R.id.map);
         map.setOnClickListener(new OnClickListener() {
@@ -148,6 +152,8 @@ public class DetailActivity extends Activity {
 
         ListView listView = (ListView) findViewById(R.id.detail_tracking_list);
         listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, events));
+
+        progressBar.setVisibility(View.GONE);
     }
 
     private class SwipeGestureListener extends GestureDetector.SimpleOnGestureListener {

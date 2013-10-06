@@ -10,19 +10,16 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-<!--     <fragment
-          android:id="@+id/map"
-          android:layout_width="match_parent"
-          android:layout_height="160dp"
-          android:name="com.google.android.gms.maps.MapFragment"/>
- -->
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical|center_horizontal" />
 
     <ImageView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="160dp"
-        android:src="@color/amethyst"
-        />
+        android:layout_height="160dp" />
 
     <ListView
         android:id="@+id/detail_tracking_list"

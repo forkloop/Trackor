@@ -39,6 +39,7 @@
             android:id="@+id/tracking_record_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="35dp"
             android:gravity="center_vertical" 
             android:paddingLeft="5dp" />
     </LinearLayout>
