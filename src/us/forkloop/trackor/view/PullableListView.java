@@ -71,8 +71,9 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
             view.invalidate();
             longClickedView = view;
             isLongClicked = true;
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
