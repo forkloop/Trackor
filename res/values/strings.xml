@@ -10,6 +10,7 @@
     <string name="archive_dialog_title">Archive this tracking?</string>
     <string name="capture">Capture</string>
     <string name="widget_add">Add a new tracking</string>
+    <string name="default_detail">Sorry, there seems to be some problem when getting tracking information.</string>
     <string-array name="carriers">
 	    <item>UPS</item>
 	    <item>FedEx</item>

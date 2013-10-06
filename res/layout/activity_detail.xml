@@ -5,9 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     <TextView
-        android:id="@+id/detail"
+        android:id="@+id/default_detail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/default_detail"
+        android:layout_gravity="center_vertical|center_horizontal"
         android:visibility="gone" />
 
     <ProgressBar
@@ -19,6 +21,7 @@
     <ImageView
         android:id="@+id/map"
         android:layout_width="match_parent"
+        android:scaleType="fitCenter"
         android:layout_height="160dp" />
 
     <ListView

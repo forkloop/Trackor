@@ -93,7 +93,6 @@ public class DetailActivity extends Activity {
     }
 
     private class GetMapTask extends AsyncTask<String, Void, Void> {
-
         private Bitmap bitmap;
 
         @Override
@@ -118,7 +117,11 @@ public class DetailActivity extends Activity {
         protected void onPostExecute(List<Event> events) {
             if (events != null && events.size() > 0) {
                 render(events);
+            } else {
+                View defaultView = findViewById(R.id.default_detail);
+                defaultView.setVisibility(View.VISIBLE);
             }
+            progressBar.setVisibility(View.GONE);
         }
         
         @Override
@@ -152,8 +155,6 @@ public class DetailActivity extends Activity {
 
         ListView listView = (ListView) findViewById(R.id.detail_tracking_list);
         listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, events));
-
-        progressBar.setVisibility(View.GONE);
     }
 
     private class SwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
