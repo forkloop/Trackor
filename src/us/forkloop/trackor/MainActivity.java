@@ -1,6 +1,5 @@
 package us.forkloop.trackor;
 
-import java.util.Locale;
 
 import us.forkloop.trackor.db.DatabaseHelper;
 import us.forkloop.trackor.db.Tracking;
@@ -58,7 +57,8 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements QuickReturn {
 
     final String TAG = getClass().getSimpleName();
-    final int TRACKING_NAME_COLUMN_INDEX = 2;
+    final int TRACKING_NAME_COLUMN_INDEX = 1;
+    final int TRACKING_CARRIER_COLUMN_INDEX = 2;
     private DatabaseHelper dbHelper;
     private Cursor cursor;
     SimpleCursorAdapter adapter;
@@ -254,12 +254,14 @@ public class MainActivity extends Activity implements QuickReturn {
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
             String text = cursor.getString(columnIndex);
+            if (columnIndex == TRACKING_NAME_COLUMN_INDEX) {
+                text = text.toUpperCase();
+            }
             if ( view instanceof TextView ) {
                 ((TextView) view).setText(text);
-                Typeface font = Typeface.createFromAsset(getAssets(), "Lato-Reg.ttf");
-                ((TextView) view).setTypeface(font);
+                ((TextView) view).setTypeface(app.getTypeface("Gotham-Book.otf"));
             }
-            if (columnIndex == TRACKING_NAME_COLUMN_INDEX) {
+            if (columnIndex == TRACKING_CARRIER_COLUMN_INDEX) {
                 if (text.equals("UPS")) {
                     view.setBackgroundColor(Color.parseColor("#d35400"));
                 } else if (text.equals("FedEx")) {

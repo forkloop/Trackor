@@ -95,7 +95,7 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
             }
         }
         if (isLongClicked) {
-            View v = longClickedView.findViewById(R.id.carrier);
+            View v = longClickedView.findViewById(R.id.tracking_info);
             v.bringToFront();
             //pass null as click listener will still consume the click event.
             //overlay.setOnClickListener(null);
