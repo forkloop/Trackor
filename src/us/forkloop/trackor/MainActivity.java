@@ -10,7 +10,8 @@ import us.forkloop.trackor.util.RightDrawableOnTouchListener;
 import us.forkloop.trackor.util.TrackorActions;
 import us.forkloop.trackor.util.TypefaceSpan;
 import us.forkloop.trackor.view.PullableListView;
-import us.forkloop.trackor.view.TrackorDialogFragment;
+import us.forkloop.trackor.view.TrackorAddTagDialogFragment;
+import us.forkloop.trackor.view.TrackorArchiveDialogFragment;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.DialogFragment;
@@ -23,7 +24,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -54,7 +54,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements QuickReturn {
+public class MainActivity extends Activity implements QuickReturn, TrackorDBDelegate {
 
     final String TAG = getClass().getSimpleName();
     final int TRACKING_NAME_COLUMN_INDEX = 1;
@@ -218,6 +218,16 @@ public class MainActivity extends Activity implements QuickReturn {
         return (PullableListView)findViewById(R.id.list);
     }
 
+    @Override
+    public void addTracking(Tracking tracking) {
+        dbHelper.addTracking(tracking);
+        (new AddTrackingAsyncTask()).execute(new String[]{""});
+    }
+
+    @Override
+    public void updateTracking(Tracking tracking) {
+        
+    }
 
     private class TrackorBroadcastReceiver extends BroadcastReceiver {
 
@@ -227,7 +237,7 @@ public class MainActivity extends Activity implements QuickReturn {
             String action = intent.getAction();
             Log.d(TAG, "Receiving " + action);
             if ("ArchiveTracking".equals(action)) {
-                DialogFragment dialogFragment = new TrackorDialogFragment();
+                DialogFragment dialogFragment = new TrackorArchiveDialogFragment();
                 dialogFragment.show(getFragmentManager(), "archive");
                 Toast.makeText(context, "Archiving...", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "" + intent.getIntExtra("id", -1));
@@ -278,6 +288,9 @@ public class MainActivity extends Activity implements QuickReturn {
         }
     }
 
+    /**
+     * refresh tracking list
+     */
     private class AddTrackingAsyncTask extends AsyncTask<String, String, String> {
 
         @Override
@@ -292,11 +305,11 @@ public class MainActivity extends Activity implements QuickReturn {
             cursor = dbHelper.getTrackings();
             return null;
         }
-
     }
 
     private class AddTrackingEvent implements OnEditorActionListener {
 
+        @SuppressWarnings("unused")
         private void requery() {
             new Thread(new Runnable() {
                 @Override
@@ -317,15 +330,14 @@ public class MainActivity extends Activity implements QuickReturn {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                String tNumber = v.getText().toString();
-                String carrier = spinner.getSelectedItem().toString();
-                Log.d(TAG, "Adding " + carrier + ": " + tNumber);
-                Tracking t = new Tracking(carrier, tNumber);
-                dbHelper.addTracking(t);
+                DialogFragment dialog = new TrackorAddTagDialogFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("carrier", spinner.getSelectedItem().toString());
+                bundle.putString("tnumber", v.getText().toString());
+                dialog.setArguments(bundle);
+                dialog.show(getFragmentManager(), "");
                 v.clearFocus();
                 v.setText("");
-                //requery();
-                (new AddTrackingAsyncTask()).execute(new String[]{""});
                 return true;
             }
             return false;

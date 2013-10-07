@@ -6,8 +6,10 @@
     <string name="settings">Settings</string>
 	<string name="hint">Tracking NO</string>
     <string name="archive">Archive</string>
+    <string name="label">Label</string>
     <string name="title_activity_detail">Detail</string>
     <string name="archive_dialog_title">Archive this tracking?</string>
+    <string name="add_tag_dialog_title">New tag to this tracking?</string>
     <string name="capture">Capture</string>
     <string name="widget_add">Add a new tracking</string>
     <string name="default_detail">Sorry, there seems to be some problem when getting tracking information.</string>

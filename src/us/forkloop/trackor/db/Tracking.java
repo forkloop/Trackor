@@ -5,20 +5,19 @@ import android.provider.BaseColumns;
 public final class Tracking {
 
     private static final String DEFAULT_NAME = "package";
-    private String carrier;
-    private String trackingNumber;
+    private final String carrier;
+    private final String trackingNumber;
     private String name;
     
     //private boolean isArchived;
     
-    public Tracking(String carrier, String trackingNumber) {
-        this(carrier, trackingNumber, DEFAULT_NAME);
-    }
-
-    public Tracking(String carrier, String trackingNumber, String name) {
+    public Tracking(final String carrier, final String trackingNumber, final String name) {
         this.carrier        = carrier;
         this.trackingNumber = trackingNumber;
         this.name           = name;
+        if (name == null || name.isEmpty()) {
+            this.name = DEFAULT_NAME;
+        }
     }
 
     public String getCarrier() {

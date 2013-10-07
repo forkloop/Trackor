@@ -8,14 +8,14 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 
-public class TrackorDialogFragment extends DialogFragment {
+public class TrackorArchiveDialogFragment extends DialogFragment {
 
     private final String TAG = getClass().getSimpleName();
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        DialogInterface.OnClickListener listener = new TrackorDialogClickListener();
+        DialogInterface.OnClickListener listener = new TrackorArchiveDialogClickListener();
         builder.setTitle(R.string.archive_dialog_title)
                .setPositiveButton(android.R.string.ok, listener)
                .setNegativeButton(android.R.string.cancel, listener);
@@ -23,7 +23,7 @@ public class TrackorDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    private class TrackorDialogClickListener implements DialogInterface.OnClickListener {
+    private class TrackorArchiveDialogClickListener implements DialogInterface.OnClickListener {
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
