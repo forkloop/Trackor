@@ -25,6 +25,10 @@ public class TrackorAddTagDialogFragment extends DialogFragment {
         edit = new EditText(getActivity());
         edit.setTypeface(app.getTypeface("Gotham-Book.otf"));
         edit.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        final String tag = getArguments().getString("tag");
+        if (tag != null) {
+            edit.setText(tag);
+        }
         DialogInterface.OnClickListener listener = new TrackorAddTagDialogClickListener();
         builder.setTitle(R.string.add_tag_dialog_title)
                .setView(edit)
@@ -40,18 +44,27 @@ public class TrackorAddTagDialogFragment extends DialogFragment {
             Bundle bundle = getArguments();
             String carrier = bundle.getString("carrier");
             String tNumber = bundle.getString("tnumber");
-            int rowId = bundle.getInt("rowid", -1);
+            long rowId = bundle.getLong("id", -1);
             Log.d(TAG, carrier + " : " + tNumber + " : " + rowId);
             if (dialog instanceof AlertDialog) {
                 Log.d(TAG, "Clicked on " + dialog + " button " + which);
                 String tag = edit.getText().toString();
-                Tracking tracking = new Tracking(carrier, tNumber, tag);
                 if (rowId < 0) {
+                    Tracking tracking;
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        tracking = new Tracking(carrier, tNumber, tag);
+                    } else {
+                        tracking = new Tracking(carrier, tNumber, null);
+                    }
                     ((TrackorDBDelegate) getActivity()).addTracking(tracking);
-                } // else update
+                } else {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        ((TrackorDBDelegate) getActivity()).updateTracking(rowId, tag);
+                    } // else nothing
+                }
                 dialog.dismiss();
             } else {
-                Log.d(TAG, "Unknown dialog, " + dialog);
+                Log.e(TAG, "Unknown dialog, " + dialog);
             }
         }
     }

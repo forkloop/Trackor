@@ -31,7 +31,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE);
     }
-
+/*
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        db.execSQL("DELETE FROM tracking WHERE carrier is null;");
+    }
+*/
     @Override
     public void onUpgrade(SQLiteDatabase db, int v1, int v2) {
         Log.d(TAG, "Upgrade table from " + v1 + " to " + v2);

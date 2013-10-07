@@ -4,9 +4,32 @@
     android:layout_height="80dp"
     android:layout_marginBottom="10dp"
     android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp"
-     >
+    android:layout_marginRight="5dp">
 
+        <LinearLayout
+            android:id="@+id/tracking_action"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FFFFFF"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/archive"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_save"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="@string/archive" />
+            <TextView
+                android:id="@+id/add_label"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_label"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="@string/label" />
+        </LinearLayout>
+<!--
     <TextView
         android:id="@+id/archive"
         android:layout_width="match_parent"
@@ -15,7 +38,7 @@
         android:textSize="24sp"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/archive" />
-
+-->
     <LinearLayout
         android:id="@+id/tracking_info"
         android:layout_width="match_parent"

@@ -2,8 +2,11 @@ package us.forkloop.trackor.view;
 
 import us.forkloop.trackor.R;
 import us.forkloop.trackor.util.QuickReturn;
+import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -15,6 +18,7 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class PullableListView extends ListView implements OnScrollListener, OnItemLongClickListener {
 
@@ -25,7 +29,8 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
     private Context context;
 
     // long click state
-    private View overlay;
+    private TextView archiveView;
+    private TextView tagView;
     private View longClickedView;
     private boolean isLongClicked;
 
@@ -65,10 +70,13 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
         // position > 0 is to no-op the long click on header
         if (!isLongClicked && position > 0) {
             Log.d(TAG, String.format("Long click position: %d id: %d", position, id));
-            overlay = view.findViewById(R.id.archive);
-            overlay.setOnClickListener(new ArchiveClickListener());
+            View overlay = view.findViewById(R.id.tracking_action);
             overlay.bringToFront();
             view.invalidate();
+            archiveView = (TextView) view.findViewById(R.id.archive);
+            archiveView.setOnClickListener(new ArchiveClickListener());
+            tagView = (TextView) view.findViewById(R.id.add_label);
+            tagView.setOnClickListener(new TagClickListener(id));
             longClickedView = view;
             isLongClicked = true;
             return true;
@@ -100,7 +108,8 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
             v.bringToFront();
             //pass null as click listener will still consume the click event.
             //overlay.setOnClickListener(null);
-            overlay.setClickable(false);
+            archiveView.setClickable(false);
+            tagView.setClickable(false);
             longClickedView.invalidate();
             isLongClicked = false;
         }
@@ -110,6 +119,27 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
     private void hideKeyboard() {
         InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    private class TagClickListener implements OnClickListener {
+
+        private long rowId;
+
+        public TagClickListener(final long rowId) {
+            this.rowId = rowId;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "clicked " + v);
+            Bundle bundle = new Bundle();
+            bundle.putLong("id", rowId);
+            String tag = ((TextView) longClickedView.findViewById(R.id.tracking_tag)).getText().toString();
+            bundle.putString("tag", tag);
+            DialogFragment dialog = new TrackorAddTagDialogFragment();
+            dialog.setArguments(bundle);
+            dialog.show(((Activity)context).getFragmentManager(), "");
+        }
     }
 
     private class ArchiveClickListener implements OnClickListener {

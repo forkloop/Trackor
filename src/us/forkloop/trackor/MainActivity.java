@@ -219,14 +219,14 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     }
 
     @Override
-    public void addTracking(Tracking tracking) {
+    public void addTracking(final Tracking tracking) {
         dbHelper.addTracking(tracking);
         (new AddTrackingAsyncTask()).execute(new String[]{""});
     }
 
     @Override
-    public void updateTracking(Tracking tracking) {
-        
+    public void updateTracking(final long id, final String newTag) {
+        Log.d(TAG, "update tracking " + id + ": " + newTag);
     }
 
     private class TrackorBroadcastReceiver extends BroadcastReceiver {
