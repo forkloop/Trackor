@@ -87,10 +87,7 @@ public class DetailActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case android.R.id.home:
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+            onBackPressed();
             return true;
         case R.id.action_refresh:
             check();
@@ -98,6 +95,12 @@ public class DetailActivity extends Activity {
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
     @Override

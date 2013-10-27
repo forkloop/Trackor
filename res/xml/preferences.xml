@@ -17,4 +17,23 @@
             android:entryValues="@array/pref_sync_freq_list_value"
             android:defaultValue="@string/pref_sync_freq_default" />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/pref_about_cat_title"
+        android:key="pref_about_cat">
+        <Preference
+            android:key="pref_help"
+            android:title="@string/pref_help"
+            android:summary="@string/pref_help_sum" />
+        <Preference
+            android:key="pref_tos"
+            android:title="@string/pref_tos" />
+        <Preference
+            android:key="pref_pp"
+            android:title="@string/pref_pp" />
+        <Preference
+            android:key="pref_version"
+            android:title="@string/pref_version"
+            android:summary="@string/pref_version_sum"
+            android:enabled="false" />
+    </PreferenceCategory>
 </PreferenceScreen>

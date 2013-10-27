@@ -50,7 +50,6 @@
         <activity
             android:theme="@style/TrackorActionBarNoTitleTheme"
             android:name="us.forkloop.trackor.SettingsActivity"
-            android:label="@string/title_activity_settings"
             android:parentActivityName="us.forkloop.trackor.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -60,6 +59,9 @@
             android:name="us.forkloop.trackor.CameraActivity"
             android:theme="@style/FullscreenTheme" >
         </activity>
+        <activity
+            android:name="us.forkloop.trackor.WebActivity"
+            android:theme="@style/TrackorActionBarNoTitleTheme" />
         <receiver
             android:name="us.forkloop.trackor.view.TrackorWidgetProvider">
             <intent-filter>
@@ -68,11 +70,5 @@
             <meta-data android:name="android.appwidget.provider"
                        android:resource="@xml/appwidget_info" />
         </receiver>
-<!--
-        <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="" />
-
- -->
     </application>
 </manifest>

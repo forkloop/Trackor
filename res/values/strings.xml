@@ -26,7 +26,7 @@
 
     <string name="pref_sync_cat_title">Sync</string>
     <string name="pref_sync">Auto Sync</string>
-    <string name="pref_sync_sum">Auto update stocks information.</string>
+    <string name="pref_sync_sum">Auto update tracking information.</string>
     <string name="pref_sync_freq">Sync Frequence</string>
     <string name="pref_sync_freq_sum">Choose the sync frequencey.</string>
     <string name="pref_sync_freq_default">60</string>
@@ -40,4 +40,12 @@
         <item>30</item>
         <item>60</item>
     </string-array>
+
+    <string name="pref_about_cat_title">About</string>
+    <string name="pref_help">Help</string>
+    <string name="pref_help_sum">Get help on how to use Trackor!</string>
+    <string name="pref_tos">Term of Service</string>
+    <string name="pref_pp">Privacy Policy</string>
+    <string name="pref_version">Trackor v1.0</string>
+    <string name="pref_version_sum">Thank you for downloading. Enjoy!</string>
 </resources>

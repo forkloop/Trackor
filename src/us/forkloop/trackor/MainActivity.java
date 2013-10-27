@@ -16,18 +16,12 @@ import us.forkloop.trackor.view.TrackorAddTagDialogFragment;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
@@ -47,7 +41,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -67,9 +60,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     private Spinner spinner;
     private PullableListView listView;
     private ActionBar actionBar;
-    private ActionBarDrawerToggle drawerToggle;
-    private DrawerLayout drawerLayout;
-    private ListView drawerListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,11 +71,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         context = this;
 
         app = TrackorApp.getInstance(getApplicationContext());
-
-        setupDrawer();
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("ArchiveTracking");
 
         actionBar = getActionBar();
         customizeActionBar();
@@ -133,7 +118,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         // started by widget
         Log.d(TAG, "Started by --> " + getIntent().getAction());
         if (TrackorActions.CAMERA_ACTION.getAction().equals(getIntent().getAction())) {
-            startActivity(new Intent(context, CameraActivity.class));
+            startActivity(new Intent(this, CameraActivity.class));
         }
     }
 
@@ -156,8 +141,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        drawerToggle.syncState();
     }
 
     @Override
@@ -203,7 +186,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             return true;
         default:
-            if (drawerToggle.onOptionsItemSelected(item)) return true; //handle touch on action bar icon
             return super.onOptionsItemSelected(item);
         }
     }
@@ -323,37 +305,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         }
     }
 
-    private class DrawerClickListener implements ListView.OnItemClickListener {
-
-        private final String TAG = getClass().getSimpleName();
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Log.d(TAG, "Clicked on " + position);
-            loadFragment(position);
-            drawerLayout.closeDrawer(drawerListView);
-        }
-
-        private void loadFragment(int position) {
-            Fragment fragment = null;
-
-            if (position == 2) {
-                fragment = new HelpFragment();
-            } else if (position == 3) {
-                fragment = new FeedbackFragment();
-            } else {
-                Log.e(TAG, "Clicked unknown fragment: " + position);
-            }
-
-            if (fragment != null) {
-                fragment.setArguments(new Bundle());
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.replace(R.id.drawer, fragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        }
-    }
-
     @Override
     public void toggleActionBar(boolean hide) {
         if (hide) {
@@ -367,35 +318,5 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         SpannableString s = new SpannableString(getString(R.string.app_name));
         s.setSpan(new TypefaceSpan(this, "Gotham-Book.otf"), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         actionBar.setTitle(s);
-
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
-        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
-                                    R.drawable.ic_drawer, R.string.app_name, R.string.app_name) {
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                invalidateOptionsMenu();
-            }
-        };
-        drawerLayout.setDrawerListener(drawerToggle);
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-    }
-
-    private void setupDrawer() {
-        // The first empty string is accommodating the action bar
-        String[] drawerEntries = new String[] {"", "Settings", "Help", "Feedback", ""};
-        drawerListView = (ListView)findViewById(R.id.drawer_list);
-        try {
-            TextView label = (TextView) getLayoutInflater().inflate(R.layout.typefaced_textview, null);
-            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-            label.setText("Version " + version);
-            label.setTypeface(app.getTypeface("Gotham-Book.otf"));
-            label.setClickable(false);
-            drawerListView.addFooterView(label);
-        } catch (NameNotFoundException nfe) {
-            Log.e(TAG, "Can not get package version, ", nfe);
-        }
-        drawerListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, drawerEntries));
-        drawerListView.setOnItemClickListener(new DrawerClickListener());
     }
 }

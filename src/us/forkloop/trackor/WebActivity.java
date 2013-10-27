@@ -1,19 +1,25 @@
 package us.forkloop.trackor;
 
-import us.forkloop.trackor.view.SettingsFragment;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.webkit.WebView;
 
-public class SettingsActivity extends Activity {
+public class WebActivity extends Activity {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment())
-                .commit();
+        Bundle bundle = getIntent().getExtras();
+        String url = bundle.getString("url");
+        WebView webView = new WebView(this);
+        setContentView(webView);
+        webView.loadUrl(url);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -32,5 +38,4 @@ public class SettingsActivity extends Activity {
         super.onBackPressed();
         overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
-
 }
