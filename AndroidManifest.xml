@@ -41,12 +41,20 @@
         <activity
             android:name="us.forkloop.trackor.DetailActivity"
             android:theme="@style/TrackorActionBarNoTitleTheme"
-            android:label="@string/title_activity_detail" >
+            android:label="@string/title_activity_detail"
+            android:parentActivityName="us.forkloop.trackor.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="us.forkloop.trackor.MainActivity" />
         </activity>
         <activity
             android:theme="@style/TrackorActionBarNoTitleTheme"
             android:name="us.forkloop.trackor.SettingsActivity"
-            android:label="@string/title_activity_settings" >
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="us.forkloop.trackor.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="us.forkloop.trackor.MainActivity" />
         </activity>
         <activity
             android:name="us.forkloop.trackor.CameraActivity"

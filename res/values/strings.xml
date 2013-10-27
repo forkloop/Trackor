@@ -23,4 +23,21 @@
         <item>ALL</item>
         <item>ACTIVE</item>
     </string-array>
+
+    <string name="pref_sync_cat_title">Sync</string>
+    <string name="pref_sync">Auto Sync</string>
+    <string name="pref_sync_sum">Auto update stocks information.</string>
+    <string name="pref_sync_freq">Sync Frequence</string>
+    <string name="pref_sync_freq_sum">Choose the sync frequencey.</string>
+    <string name="pref_sync_freq_default">60</string>
+    <string-array name="pref_sync_freq_list_key">
+        <item>10 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+    </string-array>
+    <string-array name="pref_sync_freq_list_value">
+        <item>10</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
 </resources>

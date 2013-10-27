@@ -10,7 +10,6 @@ import us.forkloop.trackor.trackable.USPSTrack;
 import us.forkloop.trackor.util.DetailTrackingAdapter;
 import us.forkloop.trackor.util.Event;
 import us.forkloop.trackor.util.TrackorNetworking;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -52,9 +51,6 @@ public class DetailActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        ActionBar actionBar = getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-
         progressBar = (ProgressBar) findViewById(R.id.progress);
 
         map = (ImageView) findViewById(R.id.map);
@@ -90,6 +86,7 @@ public class DetailActivity extends Activity {
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
             return true;
         case R.id.action_refresh:
             check();

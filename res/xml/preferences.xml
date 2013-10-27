@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory
+        android:title="@string/pref_sync_cat_title"
+        android:key="pref_sync_cat">
+        <CheckBoxPreference
+            android:key="pref_sync"
+            android:title="@string/pref_sync"
+            android:summary="@string/pref_sync_sum"
+            android:defaultValue="false" />
+        <ListPreference
+            android:dependency="pref_sync"
+            android:key="pref_sync_freq"
+            android:title="@string/pref_sync_freq"
+            android:summary="@string/pref_sync_freq_sum"
+            android:entries="@array/pref_sync_freq_list_key"
+            android:entryValues="@array/pref_sync_freq_list_value"
+            android:defaultValue="@string/pref_sync_freq_default" />
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -146,12 +146,10 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     @Override
     protected void onStart() {
         super.onStart();
-        //LocalBroadcastManager.getInstance(this).registerReceiver(receiver, null);
     }
 
     @Override
     protected void onStop() {
-        //LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         super.onStop();
     }
 
@@ -202,6 +200,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         switch (item.getItemId()) {
         case R.id.action_settings:
             startActivity(new Intent(this, SettingsActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             return true;
         default:
             if (drawerToggle.onOptionsItemSelected(item)) return true; //handle touch on action bar icon
@@ -263,7 +262,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     }
 
     private class TrackingClickListener implements OnItemClickListener {
-
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent intent = new Intent(context, DetailActivity.class);
@@ -373,6 +371,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                                     R.drawable.ic_drawer, R.string.app_name, R.string.app_name) {
+            @Override
             public void onDrawerOpened(View drawerView) {
                 invalidateOptionsMenu();
             }
