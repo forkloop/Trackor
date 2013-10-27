@@ -39,8 +39,10 @@ public final class Tracking {
     
     public static abstract class TrackingColumn implements BaseColumns {
         public static final String TABLE_NAME = "tracking";
+        public static final String INDEX_NAME = "tindex";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_CARRIER = "carrier";
         public static final String COLUMN_TRACKING_NUMBER = "tnumber";
+        public static final String COLUMN_IS_DELETED = "is_deleted";
     }
 }

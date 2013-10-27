@@ -4,6 +4,8 @@ package us.forkloop.trackor;
 import us.forkloop.trackor.db.DatabaseHelper;
 import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
+import us.forkloop.trackor.db.TrackingWithAction;
+import us.forkloop.trackor.db.TrackingWithAction.Action;
 import us.forkloop.trackor.util.ImageTextAdapter;
 import us.forkloop.trackor.util.QuickReturn;
 import us.forkloop.trackor.util.RightDrawableOnTouchListener;
@@ -11,13 +13,11 @@ import us.forkloop.trackor.util.TrackorActions;
 import us.forkloop.trackor.util.TypefaceSpan;
 import us.forkloop.trackor.view.PullableListView;
 import us.forkloop.trackor.view.TrackorAddTagDialogFragment;
-import us.forkloop.trackor.view.TrackorArchiveDialogFragment;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,7 +27,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -42,6 +41,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -52,7 +52,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
 public class MainActivity extends Activity implements QuickReturn, TrackorDBDelegate {
 
@@ -64,7 +63,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     SimpleCursorAdapter adapter;
     private TrackorApp app;
 
-    private BroadcastReceiver receiver;
     private Context context;
     private Spinner spinner;
     private PullableListView listView;
@@ -86,15 +84,13 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
 
         setupDrawer();
 
-        receiver = new TrackorBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction("ArchiveTracking");
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
         actionBar = getActionBar();
         customizeActionBar();
 
-        listView = getListView();
+        listView = (PullableListView) findViewById(R.id.list);
         // delegate to toggle actionBar
         listView.setDelegate(this);
 
@@ -124,7 +120,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         editText.setOnEditorActionListener(new AddTrackingEvent());
 
         dbHelper = new DatabaseHelper(this);
-        cursor = dbHelper.getTrackings();
+        cursor = dbHelper.getAllTrackings();
         String[] from = {TrackingColumn.COLUMN_CARRIER, TrackingColumn.COLUMN_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER};
         int[] to = { R.id.carrier, R.id.tracking_tag, R.id.tracking_number };
         adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
@@ -143,7 +139,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
 
     @Override
     protected void onDestroy() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         dbHelper.close();
         super.onDestroy();
     }
@@ -214,34 +209,56 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         }
     }
     
-    private PullableListView getListView() {
-        return (PullableListView)findViewById(R.id.list);
-    }
-
     @Override
     public void addTracking(final Tracking tracking) {
-        dbHelper.addTracking(tracking);
-        (new AddTrackingAsyncTask()).execute(new String[]{""});
+        TrackingWithAction trackingWithAction = new TrackingWithAction(tracking, Action.Add);
+        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[]{trackingWithAction});
     }
 
     @Override
-    public void updateTracking(final long id, final String newTag) {
-        Log.d(TAG, "update tracking " + id + ": " + newTag);
+    public void updateTracking(final String trackingNumber, final String newTag) {
+        Log.d(TAG, "update tracking " + trackingNumber + ": " + newTag);
+        Tracking tracking = new Tracking(null, trackingNumber, newTag);
+        TrackingWithAction trackingWithAction = new TrackingWithAction(tracking, Action.Update);
+        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[]{trackingWithAction});
     }
 
-    private class TrackorBroadcastReceiver extends BroadcastReceiver {
+    @Override
+    public void archiveTracking(final String trackingNumber) {
+        final Tracking tracking = new Tracking(null, trackingNumber, null);
+        TrackingWithAction trackingWithAction = new TrackingWithAction(tracking, Action.Archive);
+        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[]{trackingWithAction});
+    }
 
-        final String TAG = getClass().getSimpleName();
+    private class TrackingDBAsyncTask extends AsyncTask<TrackingWithAction, String, Cursor> {
+
         @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Log.d(TAG, "Receiving " + action);
-            if ("ArchiveTracking".equals(action)) {
-                DialogFragment dialogFragment = new TrackorArchiveDialogFragment();
-                dialogFragment.show(getFragmentManager(), "archive");
-                Toast.makeText(context, "Archiving...", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "" + intent.getIntExtra("id", -1));
+        protected void onPostExecute (final Cursor cursor) {
+            if (cursor != null) {
+                Log.d(TAG, "refreshing trackings list...");
+                adapter.changeCursor(cursor);
+                adapter.notifyDataSetChanged();
+                listView.onScrollStateChanged(listView, OnScrollListener.SCROLL_STATE_IDLE);
             }
+        }
+
+        @Override
+        protected Cursor doInBackground(final TrackingWithAction... args) {
+            if (args.length > 0) {
+                TrackingWithAction trackingWithAction = args[0];
+                Action action = trackingWithAction.getAction();
+                Tracking tracking = trackingWithAction.getTracking();
+                if (action == Action.Add) {
+                    dbHelper.addTracking(tracking);
+                } else if (action == Action.Archive) {
+                    dbHelper.archiveTracking(tracking.getTrackingNumber());
+                } else if (action == Action.Update) {
+                    dbHelper.updateTrackingTag(tracking.getTrackingNumber(), tracking.getName());
+                }
+                cursor = dbHelper.getAllTrackings();
+                return cursor;
+            }
+            return null;
         }
     }
 
@@ -288,44 +305,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         }
     }
 
-    /**
-     * refresh tracking list
-     */
-    private class AddTrackingAsyncTask extends AsyncTask<String, String, String> {
-
-        @Override
-        protected void onPostExecute (String result) {
-            Log.d(TAG, "refreshing...");
-            adapter.changeCursor(cursor);
-            adapter.notifyDataSetChanged();
-        }
-
-        @Override
-        protected String doInBackground(String... args) {
-            cursor = dbHelper.getTrackings();
-            return null;
-        }
-    }
-
     private class AddTrackingEvent implements OnEditorActionListener {
-
-        @SuppressWarnings("unused")
-        private void requery() {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    cursor = dbHelper.getTrackings();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "refreshing...");
-                            adapter.notifyDataSetChanged();
-                            listView.invalidate();
-                        }
-                    });
-                }
-            }).start();
-        }
 
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -334,6 +314,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
                 Bundle bundle = new Bundle();
                 bundle.putString("carrier", spinner.getSelectedItem().toString());
                 bundle.putString("tnumber", v.getText().toString());
+                bundle.putString("action", "add");
                 dialog.setArguments(bundle);
                 dialog.show(getFragmentManager(), "");
                 v.clearFocus();

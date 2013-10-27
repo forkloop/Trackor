@@ -34,7 +34,7 @@ import android.widget.Toast;
 public class DetailActivity extends Activity {
 
     private final String TAG = getClass().getSimpleName();
-
+    private static final float FLING_THRESHOLD = 100;
     // TODO width & height
     private final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=15&size=1000x300&sensor=false";
     private GestureDetectorCompat detector;
@@ -198,8 +198,12 @@ public class DetailActivity extends Activity {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy) {
             Log.d(TAG, "onFling: " + e1 + ", " + e2);
-            onBackPressed();
-            return true;
+            double diff = Math.abs(e1.getY() - e2.getY());
+            if (diff < FLING_THRESHOLD) {
+                onBackPressed();
+                return true;
+            }
+            return false;
         }
     }
 }

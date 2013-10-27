@@ -25,7 +25,7 @@ public class TrackorAddTagDialogFragment extends DialogFragment {
         edit = new EditText(getActivity());
         edit.setTypeface(app.getTypeface("Gotham-Book.otf"));
         edit.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
-        final String tag = getArguments().getString("tag");
+        final String tag = getArguments().getString(PullableListView.TRACKING_TAG_KEY);
         if (tag != null) {
             edit.setText(tag);
         }
@@ -42,29 +42,24 @@ public class TrackorAddTagDialogFragment extends DialogFragment {
         @Override
         public void onClick(DialogInterface dialog, int which) {
             Bundle bundle = getArguments();
-            String carrier = bundle.getString("carrier");
-            String tNumber = bundle.getString("tnumber");
-            long rowId = bundle.getLong("id", -1);
-            Log.d(TAG, carrier + " : " + tNumber + " : " + rowId);
-            if (dialog instanceof AlertDialog) {
-                Log.d(TAG, "Clicked on " + dialog + " button " + which);
-                String tag = edit.getText().toString();
-                if (rowId < 0) {
-                    Tracking tracking;
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        tracking = new Tracking(carrier, tNumber, tag);
-                    } else {
-                        tracking = new Tracking(carrier, tNumber, null);
-                    }
-                    ((TrackorDBDelegate) getActivity()).addTracking(tracking);
+            String trackingNumber = bundle.getString(PullableListView.TRACKING_NUMBER_KEY);
+            String action = bundle.getString("action");
+            String tag = edit.getText().toString();
+            if ("add".equals(action)) {
+                Tracking tracking;
+                String carrier = bundle.getString("carrier");
+                Log.d(TAG, "add new tracking " + carrier + ": " + trackingNumber + ": " + tag);
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    tracking = new Tracking(carrier, trackingNumber, tag);
                 } else {
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        ((TrackorDBDelegate) getActivity()).updateTracking(rowId, tag);
-                    } // else nothing
+                    tracking = new Tracking(carrier, trackingNumber, null);
                 }
-                dialog.dismiss();
-            } else {
-                Log.e(TAG, "Unknown dialog, " + dialog);
+                ((TrackorDBDelegate) getActivity()).addTracking(tracking);
+            } else if ("update".equals(action)) {
+                Log.d(TAG, "update tracking " + ": " + trackingNumber + ": " + tag);
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    ((TrackorDBDelegate) getActivity()).updateTracking(trackingNumber, tag);
+                } // else nothing
             }
         }
     }

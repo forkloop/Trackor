@@ -1,5 +1,6 @@
 package us.forkloop.trackor.view;
 
+import us.forkloop.trackor.MainActivity;
 import us.forkloop.trackor.R;
 import us.forkloop.trackor.util.QuickReturn;
 import android.app.Activity;
@@ -22,11 +23,13 @@ import android.widget.TextView;
 
 public class PullableListView extends ListView implements OnScrollListener, OnItemLongClickListener {
 
+    public static final String TRACKING_NUMBER_KEY = "tnumber";
+    public static final String TRACKING_TAG_KEY = "tag";
     private final String TAG = getClass().getSimpleName();
     private final int MAX_OVER_SCROLL = 200;
 
     private LayoutInflater inflater;
-    private Context context;
+    private MainActivity parent;
 
     // long click state
     private TextView archiveView;
@@ -45,7 +48,7 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
 
     public PullableListView(Context context, AttributeSet attributes) {
         super(context, attributes);
-        this.context = context;
+        this.parent = (MainActivity) context;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -73,10 +76,12 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
             View overlay = view.findViewById(R.id.tracking_action);
             overlay.bringToFront();
             view.invalidate();
+            TextView tv = (TextView) view.findViewById(R.id.tracking_number);
+            String trackingNumber = tv.getText().toString();
             archiveView = (TextView) view.findViewById(R.id.archive);
-            archiveView.setOnClickListener(new ArchiveClickListener());
+            archiveView.setOnClickListener(new ArchiveClickListener(trackingNumber));
             tagView = (TextView) view.findViewById(R.id.add_label);
-            tagView.setOnClickListener(new TagClickListener(id));
+            tagView.setOnClickListener(new TagClickListener(trackingNumber));
             longClickedView = view;
             isLongClicked = true;
             return true;
@@ -102,6 +107,7 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
             } else {
                 delegate.toggleActionBar(true);
             }
+            hideKeyboard();
         }
         if (isLongClicked) {
             View v = longClickedView.findViewById(R.id.tracking_info);
@@ -113,44 +119,49 @@ public class PullableListView extends ListView implements OnScrollListener, OnIt
             longClickedView.invalidate();
             isLongClicked = false;
         }
-        hideKeyboard();
     }
 
     private void hideKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager inputManager = (InputMethodManager) parent.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     private class TagClickListener implements OnClickListener {
+        private String trackingNumber;
 
-        private long rowId;
-
-        public TagClickListener(final long rowId) {
-            this.rowId = rowId;
+        public TagClickListener(final String trackingNumber) {
+            this.trackingNumber = trackingNumber;
         }
 
         @Override
         public void onClick(View v) {
             Log.d(TAG, "clicked " + v);
             Bundle bundle = new Bundle();
-            bundle.putLong("id", rowId);
+            bundle.putString(TRACKING_NUMBER_KEY, trackingNumber);
             String tag = ((TextView) longClickedView.findViewById(R.id.tracking_tag)).getText().toString();
-            bundle.putString("tag", tag);
+            bundle.putString(TRACKING_TAG_KEY, tag);
+            bundle.putString("action", "update");
             DialogFragment dialog = new TrackorAddTagDialogFragment();
             dialog.setArguments(bundle);
-            dialog.show(((Activity)context).getFragmentManager(), "");
+            dialog.show(parent.getFragmentManager(), "");
         }
     }
 
     private class ArchiveClickListener implements OnClickListener {
+        private String trackingNumber;
+
+        public ArchiveClickListener(final String trackingNumber) {
+            this.trackingNumber = trackingNumber;
+        }
 
         @Override
         public void onClick(View v) {
-            Log.d(TAG, "clicked " + v);
-            Intent intent = new Intent();
-            intent.setAction("ArchiveTracking");
-            intent.putExtra("id", 1);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            Bundle bundle = new Bundle();
+            bundle.putString(TRACKING_NUMBER_KEY, trackingNumber);
+            DialogFragment dialog = new TrackorArchiveDialogFragment();
+            dialog.setArguments(bundle);
+            dialog.show(parent.getFragmentManager(), "");
+
         }
     }
 }
