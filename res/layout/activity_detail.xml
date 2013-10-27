@@ -32,7 +32,8 @@
         android:footerDividersEnabled="true"
         android:dividerHeight="1dp" />
 
-    <TextView
+    <!--
+    <us.forkloop.trackor.view.TypefacedTextView
         android:id="@+id/archive_button" 
         android:layout_width="match_parent"
         android:layout_height="80dp"
@@ -42,5 +43,6 @@
         android:textColor="#FFFFFF"
         android:textSize="32sp"
         android:layout_marginTop="30dp"
-        />
+        trackor:typeface="Gotham-Book.otf" />
+    -->
 </LinearLayout>

@@ -13,6 +13,7 @@ import us.forkloop.trackor.util.TrackorNetworking;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,12 +29,15 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class DetailActivity extends Activity {
 
-    private final String TAG = getClass().getSimpleName();
+    private static final String TAG = "DetailActivity";
     private static final float FLING_THRESHOLD = 100;
+    private static final String ARCHIVE = "Archive";
+
     // TODO width & height
     private final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=15&size=1000x300&sensor=false";
     private GestureDetectorCompat detector;
@@ -171,22 +175,29 @@ public class DetailActivity extends Activity {
         }
     }
 
-    // TODO fix archive button gone
     private void render(List<Event> events) {
         if (defaultView != null) {
             defaultView.setVisibility(View.GONE);
         }
+
         // TODO fix if zipcode not exists
         String url = String.format(MAP_ENDPOINT, events.get(0).getZipcode());
         Log.d(TAG, "get map with " + url);
         (new GetMapTask()).execute(url);
 
         ListView listView = (ListView) findViewById(R.id.detail_tracking_list);
+        TextView tv = (TextView) getLayoutInflater().inflate(R.layout.typefaced_textview, null);
+        tv.setBackgroundColor(Color.parseColor("#c0392b"));
+        tv.setTextColor(Color.WHITE);
+        tv.setText(ARCHIVE);
+        listView.addFooterView(tv);
         listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, events));
     }
 
+    /**
+     * Swipe gesture listener to return to parent activity.
+     */
     private class SwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
-        
         @Override
         public boolean onDown(MotionEvent event) {
             return true;

@@ -386,7 +386,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         String[] drawerEntries = new String[] {"", "Settings", "Help", "Feedback", ""};
         drawerListView = (ListView)findViewById(R.id.drawer_list);
         try {
-            TextView label = (TextView) getLayoutInflater().inflate(R.layout.simple_textview, null);
+            TextView label = (TextView) getLayoutInflater().inflate(R.layout.typefaced_textview, null);
             String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
             label.setText("Version " + version);
             label.setTypeface(app.getTypeface("Gotham-Book.otf"));
