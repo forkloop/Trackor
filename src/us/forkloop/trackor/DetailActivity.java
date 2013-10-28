@@ -18,6 +18,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
@@ -37,17 +39,22 @@ public class DetailActivity extends Activity {
     private static final String TAG = "DetailActivity";
     private static final float FLING_THRESHOLD = 100;
     private static final String ARCHIVE = "Archive";
+    //FIXME width & height
+    private static final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=15&size=1000x300&sensor=false";
+    private static final String UPS_WEB_URL = "http://wwwapps.ups.com/etracking/tracking.cgi?TypeOfInquiryNumber=T&InquiryNumber1=";
+    private static final String LASERSHIP_WEB_URL = "http://www.lasership.com/track/";
+    private static final String USPS_WEB_URL = "https://tools.usps.com/go/TrackConfirmAction_input?origTrackNum=";
+    private static final String FEDEX_WEB_URL = "https://www.fedex.com/fedextrack/?tracknumbers=";
 
-    // TODO width & height
-    private final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=15&size=1000x300&sensor=false";
     private GestureDetectorCompat detector;
     private TrackorApp app;
     private ImageView map;
     private ProgressBar progressBar;
     private View defaultView;
 
+    private String webUrl;
     private String carrier;
-    private String tNumber;
+    private String trackingNumber;
     private boolean isChecking;
 
     @Override
@@ -61,7 +68,7 @@ public class DetailActivity extends Activity {
         map.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // FIXME
+                //FIXME
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=New+York,NY&z=18"));
                 startActivity(intent);
             }
@@ -72,7 +79,7 @@ public class DetailActivity extends Activity {
 
         Intent intent = getIntent();
         carrier = intent.getStringExtra("carrier");
-        tNumber = intent.getStringExtra("tnumber");
+        trackingNumber = intent.getStringExtra("tnumber");
         check();
     }
 
@@ -129,61 +136,75 @@ public class DetailActivity extends Activity {
     }
 
     private void check() {
-        if (carrier != null && tNumber != null && !isChecking) {
+        if (carrier != null && trackingNumber != null && !isChecking) {
             isChecking = true;
             progressBar.setVisibility(View.VISIBLE);
             if (app.isConnected()) {
-                (new CheckStatusAsyncTask()).execute(new String[]{carrier, tNumber});
+                (new CheckStatusAsyncTask()).execute();
             } else {
                 Toast.makeText(this, "Network disconnected!", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private class CheckStatusAsyncTask extends AsyncTask<String, Void, List<Event>> {
-
+    private class CheckStatusAsyncTask extends AsyncTask<Void, Void, List<Event>> {
         @Override
         protected void onPostExecute(List<Event> events) {
             if (events != null && events.size() > 0) {
-                render(events);
+                renderSuccess(events);
             } else {
-                defaultView = findViewById(R.id.default_detail);
-                defaultView.setVisibility(View.VISIBLE);
+                renderFailure();
             }
             progressBar.setVisibility(View.GONE);
             isChecking = false;
         }
         
         @Override
-        protected List<Event> doInBackground(String... args) {
-            String carrier = args[0];
-            String tNumber = args[1];
-            Log.d(TAG, "Start to request status from " + carrier + " " + tNumber);
+        protected List<Event> doInBackground(Void... args) {
+            Log.d(TAG, "Start to check status from " + carrier + " " + trackingNumber);
             Trackable trackable = null;
             if ("USPS".equals(carrier)) {
                 trackable = new USPSTrack();
+                webUrl = USPS_WEB_URL + trackingNumber;
             } else if ("UPS".equals(carrier)) {
                 trackable = new UPSTrack();
+                webUrl = UPS_WEB_URL + trackingNumber;
             } else if ("FedEx".equals(carrier)) {
                 // need context to load template from asset folder
                 trackable = new FedExTrack(getApplicationContext());
+                webUrl = FEDEX_WEB_URL + trackingNumber;
             } else if ("LASERSHIP".equals(carrier)) {
+                webUrl = LASERSHIP_WEB_URL + trackingNumber;
                 trackable = new LASERSHIPTrack();
             } else {
                 Log.e(TAG, "Unknown carrier " + carrier);
                 return null;
             }
-            List<Event> events = trackable.track(tNumber);
+            List<Event> events = trackable.track(trackingNumber);
             return events;
         }
     }
 
-    private void render(List<Event> events) {
+    private void renderFailure() {
+        if (defaultView == null) {
+            defaultView = findViewById(R.id.default_detail);
+            if (webUrl != null) {
+                TextView defaultText = (TextView) findViewById(R.id.default_text);
+                String info = defaultText.getText().toString();
+                String html = info + "<a href=\"" + webUrl + "\"> Touch to view the detail tracking information here.";
+                defaultText.setText(Html.fromHtml(html));
+                defaultText.setMovementMethod(LinkMovementMethod.getInstance());
+            }
+        }
+        defaultView.setVisibility(View.VISIBLE);
+    }
+
+    private void renderSuccess(List<Event> events) {
         if (defaultView != null) {
             defaultView.setVisibility(View.GONE);
         }
 
-        // TODO fix if zipcode not exists
+        //FIXME fix if zipcode not exists
         String url = String.format(MAP_ENDPOINT, events.get(0).getZipcode());
         Log.d(TAG, "get map with " + url);
         (new GetMapTask()).execute(url);

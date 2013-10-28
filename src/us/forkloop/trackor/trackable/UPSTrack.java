@@ -48,6 +48,8 @@ public class UPSTrack implements Trackable {
         try {
             URL url = new URL(ENDPOINT);
             conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(TIMEOUT);
+            conn.setReadTimeout(TIMEOUT);
             conn.setDoOutput(true);
             conn.setChunkedStreamingMode(0);
             conn.setRequestMethod("POST");

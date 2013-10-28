@@ -12,7 +12,7 @@
     <string name="add_tag_dialog_title">New tag to this tracking?</string>
     <string name="capture">Capture</string>
     <string name="widget_add">Add a new tracking</string>
-    <string name="default_detail">Sorry, there seems to be some problem when getting tracking information.</string>
+    <string name="default_detail">Sorry, the tracking information may not available now.</string>
     <string-array name="carriers">
 	    <item>UPS</item>
 	    <item>FedEx</item>
@@ -23,6 +23,10 @@
         <item>ALL</item>
         <item>ACTIVE</item>
     </string-array>
+
+    <string name="map_endpoint"></string>
+    <string name="lasership_web_url"></string>
+    <string name="ups_web_url"></string>
 
     <string name="pref_sync_cat_title">Sync</string>
     <string name="pref_sync">Auto Sync</string>

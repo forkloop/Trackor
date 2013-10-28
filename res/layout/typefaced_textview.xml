@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <us.forkloop.trackor.view.TypefacedTextView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:trackor="http://schemas.android.com/apk/res/"
+        xmlns:trackor="http://schemas.android.com/apk/res/us.forkloop.trackor"
     android:paddingTop="20dp"
     android:paddingBottom="20dp"
     android:layout_width="match_parent"

@@ -20,7 +20,7 @@ public class FedExTrack implements Trackable {
     private final String TAG = getClass().getSimpleName();
     private final String ENDPOINT = "https://wsbeta.fedex.com/xml";
 
-    private Context context;
+    private final Context context;
 
     public FedExTrack(Context context) {
         this.context = context;
@@ -39,6 +39,8 @@ public class FedExTrack implements Trackable {
                 URL url = new URL(ENDPOINT);
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setDoOutput(true);
+                conn.setConnectTimeout(TIMEOUT);
+                conn.setReadTimeout(TIMEOUT);
                 conn.setChunkedStreamingMode(0);
                 conn.setRequestMethod("POST");
                 OutputStream out = conn.getOutputStream();

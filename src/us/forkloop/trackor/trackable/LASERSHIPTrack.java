@@ -25,6 +25,8 @@ public class LASERSHIPTrack implements Trackable {
             Log.d(TAG, "fetching status for " + trackingNumber);
             final URL url = new URL(endpoint);
             conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(TIMEOUT);
+            conn.setReadTimeout(TIMEOUT);
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStream in = conn.getInputStream();
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
