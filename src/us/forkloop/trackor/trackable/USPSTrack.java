@@ -20,7 +20,6 @@ import us.forkloop.trackor.util.Event;
 import android.util.Log;
 import android.util.Xml;
 
-// TODO contact USPS service
 public class USPSTrack implements Trackable {
 
     private final String TAG = getClass().getSimpleName();

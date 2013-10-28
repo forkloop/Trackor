@@ -6,7 +6,7 @@ import us.forkloop.trackor.trackable.FedExTrack;
 import us.forkloop.trackor.trackable.LASERSHIPTrack;
 import us.forkloop.trackor.trackable.Trackable;
 import us.forkloop.trackor.trackable.UPSTrack;
-import us.forkloop.trackor.trackable.USPSTrack;
+import us.forkloop.trackor.trackable.USPSHTMLTrack;
 import us.forkloop.trackor.util.DetailTrackingAdapter;
 import us.forkloop.trackor.util.Event;
 import us.forkloop.trackor.util.TrackorNetworking;
@@ -164,7 +164,7 @@ public class DetailActivity extends Activity {
             Log.d(TAG, "Start to check status from " + carrier + " " + trackingNumber);
             Trackable trackable = null;
             if ("USPS".equals(carrier)) {
-                trackable = new USPSTrack();
+                trackable = new USPSHTMLTrack();
                 webUrl = USPS_WEB_URL + trackingNumber;
             } else if ("UPS".equals(carrier)) {
                 trackable = new UPSTrack();
