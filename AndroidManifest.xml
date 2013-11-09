@@ -56,7 +56,7 @@
                 android:value="us.forkloop.trackor.MainActivity" />
         </activity>
         <activity
-            android:name="us.forkloop.trackor.CameraActivity"
+            android:name="us.forkloop.trackor.CaptureActivity"
             android:theme="@style/FullscreenTheme" >
         </activity>
         <activity

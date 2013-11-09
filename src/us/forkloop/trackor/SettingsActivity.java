@@ -7,6 +7,11 @@ import android.view.MenuItem;
 
 public class SettingsActivity extends Activity {
 
+    public static final String KEY_AUTO_FOCUS = "auto";
+    public static final String KEY_DISABLE_CONTINUOUS_FOCUS = "continuous";
+    public static final String KEY_INVERT_SCAN = "invert";
+    public static final String KEY_FRONT_LIGHT_MODE = "front";
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

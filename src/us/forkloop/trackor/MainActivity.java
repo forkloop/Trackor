@@ -94,7 +94,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         editText.setOnTouchListener(new RightDrawableOnTouchListener(editText) {
             @Override
             public boolean onDrawableTouch(MotionEvent event) {
-                Intent cameraIntent = new Intent(context, CameraActivity.class);
+                Intent cameraIntent = new Intent(context, CaptureActivity.class);
                 startActivity(cameraIntent);
                 return true;
             }
@@ -118,7 +118,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         // started by widget
         Log.d(TAG, "Started by --> " + getIntent().getAction());
         if (TrackorActions.CAMERA_ACTION.getAction().equals(getIntent().getAction())) {
-            startActivity(new Intent(this, CameraActivity.class));
+            startActivity(new Intent(this, CaptureActivity.class));
         }
     }
 
