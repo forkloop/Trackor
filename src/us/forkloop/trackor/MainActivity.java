@@ -162,13 +162,15 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                return customizeView(position, convertView, parent);
+                View view = customizeView(position, convertView, parent);
+                view.setBackgroundColor(getResources().getColor(R.color.peter_river));
+                return view;
             }
 
             private View customizeView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
                     LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    convertView = inflater.inflate(R.layout.showtype_spinner_row, null);
+                    convertView = inflater.inflate(R.layout.showtype_spinner_row, parent, false);
                 }
                 TextView tv = (TextView) convertView.findViewById(R.id.showtype_spinner_entry);
                 tv.setText(getItem(position));
@@ -177,7 +179,6 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
             }
         };
         spinner.setAdapter(showTypeAdapter);
-
         return super.onCreateOptionsMenu(menu);
     }
 

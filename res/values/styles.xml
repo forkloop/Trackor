@@ -25,9 +25,9 @@
         <item name="buttonBarButtonStyle">@style/ButtonBarButton</item>
     </style>
 
-    <style name="FlatSpinnerStyle" parent="android:style/Widget.ListView.DropDown">
+    <style name="SpinnerStyle" parent="android:style/Widget.ListView.DropDown">
         <item name="android:divider">#ff0000</item>
-        <item name="android:dividerHeight">5dp</item>
+        <item name="android:dividerHeight">1dp</item>
     </style>
 
     <style name="ButtonBar">

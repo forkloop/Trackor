@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:trackor="http://schemas.android.com/apk/res/us.forkloop.trackor"
     android:layout_width="match_parent"
     android:layout_height="80dp"
     android:layout_marginBottom="10dp"
@@ -12,22 +13,28 @@
             android:layout_height="match_parent"
             android:background="#FFFFFF"
             android:orientation="horizontal">
-            <TextView
+            <us.forkloop.trackor.view.TypefacedTextView
                 android:id="@+id/archive"
                 android:layout_width="0dp"
                 android:layout_weight="0.5"
                 android:layout_height="match_parent"
-                android:drawableTop="@drawable/ic_save"
+                android:drawableTop="@drawable/ic_action_save"
                 android:gravity="center_horizontal|center_vertical"
-                android:text="@string/archive" />
-            <TextView
+                android:text="@string/archive"
+                android:background="@color/pomegranate"
+                android:textColor="#FFFFFF"
+                trackor:typeface="Gotham-Book.otf" />
+            <us.forkloop.trackor.view.TypefacedTextView
                 android:id="@+id/add_label"
                 android:layout_width="0dp"
                 android:layout_weight="0.5"
                 android:layout_height="match_parent"
-                android:drawableTop="@drawable/ic_label"
+                android:drawableTop="@drawable/ic_action_new_label"
+                android:background="@color/emerald"
+                android:textColor="#FFFFFF"
                 android:gravity="center_horizontal|center_vertical"
-                android:text="@string/label" />
+                android:text="@string/label"
+                trackor:typeface="Gotham-Book.otf" />
         </LinearLayout>
 <!--
     <TextView

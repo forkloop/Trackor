@@ -36,7 +36,6 @@ import android.widget.Toast;
 public class DetailActivity extends Activity implements SwipeReturnGesture.SwipeReturnGestureListener {
 
     private static final String TAG = "DetailActivity";
-    private static final float FLING_THRESHOLD = 100;
     private static final String ARCHIVE = "Archive";
     // FIXME width & height
     private static final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=15&size=1000x300&sensor=false";

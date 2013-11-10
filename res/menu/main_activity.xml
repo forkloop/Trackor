@@ -3,6 +3,7 @@
 
 <item
     android:id="@+id/action_showtype"
+    android:title="@string/list"
     android:showAsAction="always"
     android:actionLayout="@layout/showtype_layout" />
 
