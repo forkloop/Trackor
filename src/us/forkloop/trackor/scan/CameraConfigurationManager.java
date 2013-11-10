@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2010 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package us.forkloop.trackor.scan;
 
 import java.util.ArrayList;
@@ -60,8 +44,10 @@ final class CameraConfigurationManager {
         Camera.Parameters parameters = camera.getParameters();
         WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
-        int width = display.getWidth();
-        int height = display.getHeight();
+        screenResolution = new Point();
+        display.getSize(screenResolution);
+        int width = screenResolution.x;
+        int height = screenResolution.y;
         // We're landscape-only, and have apparently seen issues with display thinking it's portrait
         // when waking from sleep. If it's not landscape, assume it's mistaken and reverse them:
         if (width < height) {
@@ -173,11 +159,6 @@ final class CameraConfigurationManager {
         if (flashMode != null) {
             parameters.setFlashMode(flashMode);
         }
-
-        /*
-         * SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context); if (!prefs.getBoolean(PreferencesActivity.KEY_DISABLE_EXPOSURE, false)) { if (!safeMode) {
-         * ExposureInterface exposure = new ExposureManager().build(); exposure.setExposure(parameters, newSetting); } }
-         */
     }
 
     private Point findBestPreviewSizeValue(Camera.Parameters parameters, Point screenResolution) {

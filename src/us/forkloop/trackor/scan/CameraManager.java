@@ -7,6 +7,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -28,6 +29,9 @@ public class CameraManager {
     private Rect framingRect;
     private Rect framingRectInPreview;
     private boolean previewing;
+    private boolean initialized;
+    private int requestedFramingRectWidth;
+    private int requestedFramingRectHeight;
 
     private final PreviewCallback previewCallback;
 
@@ -42,6 +46,76 @@ public class CameraManager {
     }
 
     public synchronized void openDriver(SurfaceHolder holder) throws IOException {
+        Camera theCamera = camera;
+        if (theCamera == null) {
+            theCamera = Camera.open();
+            if (theCamera == null) {
+                throw new IOException();
+            }
+            // theCamera.setDisplayOrientation(90);
+            camera = theCamera;
+        }
+        theCamera.setPreviewDisplay(holder);
+
+        if (!initialized) {
+            initialized = true;
+            configManager.initFromCameraParameters(theCamera);
+            if (requestedFramingRectWidth > 0 && requestedFramingRectHeight > 0) {
+                setManualFramingRect(requestedFramingRectWidth, requestedFramingRectHeight);
+                requestedFramingRectWidth = 0;
+                requestedFramingRectHeight = 0;
+            }
+        }
+
+        Camera.Parameters parameters = theCamera.getParameters();
+        String parametersFlattened = parameters == null ? null : parameters.flatten(); // Save these, temporarily
+        try {
+            configManager.setDesiredCameraParameters(theCamera, false);
+        } catch (RuntimeException re) {
+            // Driver failed
+            Log.w(TAG, "Camera rejected parameters. Setting only minimal safe-mode parameters");
+            Log.i(TAG, "Resetting to saved camera params: " + parametersFlattened);
+            // Reset:
+            if (parametersFlattened != null) {
+                parameters = theCamera.getParameters();
+                parameters.unflatten(parametersFlattened);
+                try {
+                    theCamera.setParameters(parameters);
+                    configManager.setDesiredCameraParameters(theCamera, true);
+                } catch (RuntimeException re2) {
+                    // Well, darn. Give up
+                    Log.w(TAG, "Camera rejected even safe-mode parameters! No configuration");
+                }
+            }
+        }
+    }
+
+    /**
+     * Allows third party apps to specify the scanning rectangle dimensions, rather than determine them automatically based on screen resolution.
+     * 
+     * @param width
+     *            The width in pixels to scan.
+     * @param height
+     *            The height in pixels to scan.
+     */
+    public synchronized void setManualFramingRect(int width, int height) {
+        if (initialized) {
+            Point screenResolution = configManager.getScreenResolution();
+            if (width > screenResolution.x) {
+                width = screenResolution.x;
+            }
+            if (height > screenResolution.y) {
+                height = screenResolution.y;
+            }
+            int leftOffset = (screenResolution.x - width) / 2;
+            int topOffset = (screenResolution.y - height) / 2;
+            framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
+            Log.d(TAG, "Calculated manual framing rect: " + framingRect);
+            framingRectInPreview = null;
+        } else {
+            requestedFramingRectWidth = width;
+            requestedFramingRectHeight = height;
+        }
     }
 
     /**
@@ -189,6 +263,16 @@ public class CameraManager {
 
         @Override
         public void onPreviewFrame(byte[] data, Camera camera) {
+            Point cameraResolution = configManager.getCameraResolution();
+            Handler thePreviewHandler = previewHandler;
+            if (cameraResolution != null && thePreviewHandler != null) {
+                Message message = thePreviewHandler.obtainMessage(previewMessage, cameraResolution.x,
+                        cameraResolution.y, data);
+                message.sendToTarget();
+                previewHandler = null;
+            } else {
+                Log.d(TAG, "Got preview callback, but no handler or resolution available");
+            }
         }
     }
 }

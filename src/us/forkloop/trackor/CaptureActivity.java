@@ -6,11 +6,13 @@ import java.util.Map;
 
 import us.forkloop.trackor.scan.CameraManager;
 import us.forkloop.trackor.scan.CaptureActivityHandler;
+import us.forkloop.trackor.scan.Intents;
 import us.forkloop.trackor.util.FinishListener;
 import us.forkloop.trackor.view.ViewfinderView;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +21,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -34,7 +37,6 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
 
     private CaptureActivityHandler handler;
     private Result savedResultToShow;
-    private Result lastResult;
     private CameraManager cameraManager;
     private Collection<BarcodeFormat> decodeFormats;
     private Map<DecodeHintType, ?> decodeHints;
@@ -53,10 +55,14 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
 
     @Override
     protected void onResume() {
+        super.onResume();
         cameraManager = new CameraManager(getApplication());
 
         viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
         viewfinderView.setCameraManager(cameraManager);
+
+        handler = null;
+        resetStatusView();
 
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
@@ -69,6 +75,11 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
             surfaceHolder.addCallback(this);
         }
 
+        decodeFormats = null;
+        characterSet = null;
+
+        Intent intent = getIntent();
+        characterSet = intent.getStringExtra(Intents.Scan.CHARACTER_SET);
     }
 
     @Override
@@ -88,7 +99,13 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return false;
+        switch (keyCode) {
+        case KeyEvent.KEYCODE_BACK:
+            setResult(RESULT_CANCELED);
+            finish();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -136,6 +153,10 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
     public void handleDecode(Result rawResult, Bitmap barcode, float scaleFactor) {
         ParsedResult result = ResultParser.parseResult(rawResult);
         Log.d(TAG, "code " + result.getDisplayResult());
+        Intent intent = new Intent();
+        intent.putExtra(MainActivity.CODE, result.getDisplayResult());
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     public void drawViewfinder() {
@@ -171,6 +192,7 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
             // Creating the handler starts the preview, which can also throw a RuntimeException.
             if (handler == null) {
                 handler = new CaptureActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
+                Log.d(TAG, "new handler " + handler);
             }
             decodeOrStoreSavedBitmap(null, null);
         } catch (IOException ioe) {
@@ -191,6 +213,10 @@ public class CaptureActivity extends Activity implements SurfaceHolder.Callback 
         builder.setPositiveButton(Dialog.BUTTON_POSITIVE, new FinishListener(this));
         builder.setOnCancelListener(new FinishListener(this));
         builder.show();
+    }
+
+    private void resetStatusView() {
+        viewfinderView.setVisibility(View.VISIBLE);
     }
 
 }

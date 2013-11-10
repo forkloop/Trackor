@@ -1,6 +1,5 @@
 package us.forkloop.trackor;
 
-
 import us.forkloop.trackor.db.DatabaseHelper;
 import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
@@ -48,7 +47,10 @@ import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity implements QuickReturn, TrackorDBDelegate {
 
-    final String TAG = getClass().getSimpleName();
+    private static final String TAG = "MainActivity";
+    private static final int CAPTURE_REQUEST_CODE = 10;
+    static final String CODE = "code";
+
     final int TRACKING_NAME_COLUMN_INDEX = 1;
     final int TRACKING_CARRIER_COLUMN_INDEX = 2;
     private DatabaseHelper dbHelper;
@@ -60,11 +62,12 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     private Spinner spinner;
     private PullableListView listView;
     private ActionBar actionBar;
+    private EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //FIXME
+        // FIXME
         requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         setContentView(R.layout.activity_main);
 
@@ -88,25 +91,25 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         ImageTextAdapter carrierAdapter = new ImageTextAdapter(this, R.layout.carrier_spinner_row, carriers);
         spinner.setAdapter(carrierAdapter);
 
-        EditText editText = (EditText) findViewById(R.id.fillin_tnumber);
+        editText = (EditText) findViewById(R.id.fillin_tnumber);
         editText.setTypeface(app.getTypeface("Gotham-Book.otf"));
         editText.clearFocus();
         editText.setOnTouchListener(new RightDrawableOnTouchListener(editText) {
             @Override
             public boolean onDrawableTouch(MotionEvent event) {
-                Intent cameraIntent = new Intent(context, CaptureActivity.class);
-                startActivity(cameraIntent);
+                Intent captureIntent = new Intent(context, CaptureActivity.class);
+                startActivityForResult(captureIntent, CAPTURE_REQUEST_CODE);
                 return true;
             }
         });
 
-        //FIXME
+        // FIXME
         editText.setImeActionLabel("Add", KeyEvent.KEYCODE_ENTER);
         editText.setOnEditorActionListener(new AddTrackingEvent());
 
         dbHelper = new DatabaseHelper(this);
         cursor = dbHelper.getAllTrackings();
-        String[] from = {TrackingColumn.COLUMN_CARRIER, TrackingColumn.COLUMN_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER};
+        String[] from = { TrackingColumn.COLUMN_CARRIER, TrackingColumn.COLUMN_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER };
         int[] to = { R.id.carrier, R.id.tracking_tag, R.id.tracking_number };
         adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         adapter.setViewBinder(new TrackingViewBinder());
@@ -149,16 +152,16 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         inflater.inflate(R.menu.main_activity, menu);
 
         MenuItem showTypeItem = menu.findItem(R.id.action_showtype);
-        Spinner spinner = (Spinner)showTypeItem.getActionView();
+        Spinner spinner = (Spinner) showTypeItem.getActionView();
         String[] showType = getResources().getStringArray(R.array.show_type);
         ArrayAdapter<String> showTypeAdapter = new ArrayAdapter<String>(this, R.layout.showtype_spinner_row, showType) {
             @Override
-            public View getView (int position, View convertView, ViewGroup parent) {
+            public View getView(int position, View convertView, ViewGroup parent) {
                 return customizeView(position, convertView, parent);
             }
 
             @Override
-            public View getDropDownView (int position, View convertView, ViewGroup parent) {
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 return customizeView(position, convertView, parent);
             }
 
@@ -189,11 +192,25 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
             return super.onOptionsItemSelected(item);
         }
     }
-    
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAPTURE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                String code = data.getStringExtra(CODE);
+                if (editText != null) {
+                    editText.setText(code);
+                }
+            } else {
+                Log.d(TAG, "manually cancelled.");
+            }
+        }
+    }
+
     @Override
     public void addTracking(final Tracking tracking) {
         TrackingWithAction trackingWithAction = new TrackingWithAction(tracking, Action.Add);
-        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[]{trackingWithAction});
+        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[] { trackingWithAction });
     }
 
     @Override
@@ -201,20 +218,20 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         Log.d(TAG, "update tracking " + trackingNumber + ": " + newTag);
         Tracking tracking = new Tracking(null, trackingNumber, newTag);
         TrackingWithAction trackingWithAction = new TrackingWithAction(tracking, Action.Update);
-        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[]{trackingWithAction});
+        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[] { trackingWithAction });
     }
 
     @Override
     public void archiveTracking(final String trackingNumber) {
         final Tracking tracking = new Tracking(null, trackingNumber, null);
         TrackingWithAction trackingWithAction = new TrackingWithAction(tracking, Action.Archive);
-        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[]{trackingWithAction});
+        (new TrackingDBAsyncTask()).execute(new TrackingWithAction[] { trackingWithAction });
     }
 
     private class TrackingDBAsyncTask extends AsyncTask<TrackingWithAction, String, Cursor> {
 
         @Override
-        protected void onPostExecute (final Cursor cursor) {
+        protected void onPostExecute(final Cursor cursor) {
             if (cursor != null) {
                 Log.d(TAG, "refreshing trackings list...");
                 adapter.changeCursor(cursor);
@@ -255,7 +272,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
             overridePendingTransition(R.anim.slide_in_right, android.R.anim.slide_out_right);
         }
     }
-    
+
     private class TrackingViewBinder implements SimpleCursorAdapter.ViewBinder {
 
         @Override
@@ -264,7 +281,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
             if (columnIndex == TRACKING_NAME_COLUMN_INDEX) {
                 text = text.toUpperCase();
             }
-            if ( view instanceof TextView ) {
+            if (view instanceof TextView) {
                 ((TextView) view).setText(text);
                 ((TextView) view).setTypeface(app.getTypeface("Gotham-Book.otf"));
             }
