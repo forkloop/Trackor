@@ -9,6 +9,7 @@ import us.forkloop.trackor.trackable.UPSTrack;
 import us.forkloop.trackor.trackable.USPSHTMLTrack;
 import us.forkloop.trackor.util.DetailTrackingAdapter;
 import us.forkloop.trackor.util.Event;
+import us.forkloop.trackor.util.SwipeReturnGesture;
 import us.forkloop.trackor.util.TrackorNetworking;
 import android.app.Activity;
 import android.content.Intent;
@@ -17,11 +18,9 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.view.GestureDetectorCompat;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,19 +33,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DetailActivity extends Activity {
+public class DetailActivity extends Activity implements SwipeReturnGesture.SwipeReturnGestureListener {
 
     private static final String TAG = "DetailActivity";
     private static final float FLING_THRESHOLD = 100;
     private static final String ARCHIVE = "Archive";
-    //FIXME width & height
+    // FIXME width & height
     private static final String MAP_ENDPOINT = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=15&size=1000x300&sensor=false";
     private static final String UPS_WEB_URL = "http://wwwapps.ups.com/etracking/tracking.cgi?TypeOfInquiryNumber=T&InquiryNumber1=";
     private static final String LASERSHIP_WEB_URL = "http://www.lasership.com/track/";
     private static final String USPS_WEB_URL = "https://tools.usps.com/go/TrackConfirmAction_input?origTrackNum=";
     private static final String FEDEX_WEB_URL = "https://www.fedex.com/fedextrack/?tracknumbers=";
 
-    private GestureDetectorCompat detector;
+    private SwipeReturnGesture gesture;
     private TrackorApp app;
     private ImageView map;
     private ProgressBar progressBar;
@@ -68,14 +67,14 @@ public class DetailActivity extends Activity {
         map.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                //FIXME
+                // FIXME
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=New+York,NY&z=18"));
                 startActivity(intent);
             }
         });
 
         app = TrackorApp.getInstance(getApplicationContext());
-        detector = new GestureDetectorCompat(this, new SwipeGestureListener());
+        gesture = new SwipeReturnGesture(this, this);
 
         Intent intent = getIntent();
         carrier = intent.getStringExtra("carrier");
@@ -111,9 +110,9 @@ public class DetailActivity extends Activity {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        detector.onTouchEvent(event);
-        return super.onTouchEvent(event);
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        gesture.onTouchEvent(ev);
+        return super.dispatchTouchEvent(ev);
     }
 
     private class GetMapTask extends AsyncTask<String, Void, Void> {
@@ -158,7 +157,7 @@ public class DetailActivity extends Activity {
             progressBar.setVisibility(View.GONE);
             isChecking = false;
         }
-        
+
         @Override
         protected List<Event> doInBackground(Void... args) {
             Log.d(TAG, "Start to check status from " + carrier + " " + trackingNumber);
@@ -204,7 +203,7 @@ public class DetailActivity extends Activity {
             defaultView.setVisibility(View.GONE);
         }
 
-        //FIXME fix if zipcode not exists
+        // FIXME fix if zipcode not exists
         String url = String.format(MAP_ENDPOINT, events.get(0).getZipcode());
         Log.d(TAG, "get map with " + url);
         (new GetMapTask()).execute(url);
@@ -218,24 +217,8 @@ public class DetailActivity extends Activity {
         listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, events));
     }
 
-    /**
-     * Swipe gesture listener to return to parent activity.
-     */
-    private class SwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onDown(MotionEvent event) {
-            return true;
-        }
-        
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy) {
-            Log.d(TAG, "onFling: " + e1 + ", " + e2);
-            double diff = Math.abs(e1.getY() - e2.getY());
-            if (diff < FLING_THRESHOLD) {
-                onBackPressed();
-                return true;
-            }
-            return false;
-        }
+    @Override
+    public void onSwipe() {
+        onBackPressed();
     }
 }
