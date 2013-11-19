@@ -11,20 +11,20 @@ import android.util.Log;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseHelper";
-    private static final int DB_VERSION    = 2;
-    private static final String DB_NAME    = "trackings.db";
-    private static final String CREATE_TABLE = 
+    private static final int DB_VERSION = 2;
+    private static final String DB_NAME = "trackings.db";
+    private static final String CREATE_TABLE =
             "CREATE TABLE " + TrackingColumn.TABLE_NAME + " ( "
-            + TrackingColumn._ID + " INTEGER PRIMARY KEY,"
-            + TrackingColumn.COLUMN_NAME + " TEXT NOT NULL,"
-            + TrackingColumn.COLUMN_CARRIER + " TEXT NOT NULL,"
-            + TrackingColumn.COLUMN_TRACKING_NUMBER + " TEXT NOT NULL UNIQUE,"
-            + TrackingColumn.COLUMN_IS_DELETED + " INTEGER NOT NULL );";
+                    + TrackingColumn._ID + " INTEGER PRIMARY KEY,"
+                    + TrackingColumn.COLUMN_NAME + " TEXT NOT NULL,"
+                    + TrackingColumn.COLUMN_CARRIER + " TEXT NOT NULL,"
+                    + TrackingColumn.COLUMN_TRACKING_NUMBER + " TEXT NOT NULL UNIQUE,"
+                    + TrackingColumn.COLUMN_IS_DELETED + " INTEGER NOT NULL );";
     private static final String CREATE_INDEX_SQL =
             "CREATE INDEX " + TrackingColumn.INDEX_NAME + " ON " + TrackingColumn.TABLE_NAME + " ( " + TrackingColumn.COLUMN_TRACKING_NUMBER + " );";
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TrackingColumn.TABLE_NAME;
     private static final String DROP_INDEX_SQL = "DROP INDEX IF EXISTS " + TrackingColumn.INDEX_NAME;
-    
+
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
@@ -38,10 +38,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.endTransaction();
     }
 
-//    @Override
-//    public void onOpen(SQLiteDatabase db) {
-//        db.execSQL("DELETE FROM tracking WHERE carrier is null;");
-//   }
+    // @Override
+    // public void onOpen(SQLiteDatabase db) {
+    // db.execSQL("DELETE FROM tracking WHERE carrier is null;");
+    // }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int v1, int v2) {
@@ -68,9 +68,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return id;
     }
 
-    public Cursor getAllTrackings() {
+    public Cursor getArchiveTrackings() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.query(TrackingColumn.TABLE_NAME, null, null, null, null, null, TrackingColumn._ID + " DESC");
+        Cursor c = db.query(TrackingColumn.TABLE_NAME, null, TrackingColumn.COLUMN_IS_DELETED + " = 1", null, null, null, TrackingColumn._ID + " DESC");
         return c;
     }
 
@@ -83,7 +83,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public int archiveTracking(String trackingNumber) {
         Log.d(TAG, "archive tracking " + trackingNumber);
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(TrackingColumn.TABLE_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER + " = ?", new String[] {trackingNumber});
+        ContentValues values = new ContentValues();
+        values.put(TrackingColumn.COLUMN_IS_DELETED, 1);
+        return db.update(TrackingColumn.TABLE_NAME, values, TrackingColumn.COLUMN_TRACKING_NUMBER + " = ?", new String[] { trackingNumber });
     }
 
     public int updateTrackingTag(String trackingNumber, String tag) {
@@ -91,6 +93,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(TrackingColumn.COLUMN_NAME, tag);
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.update(TrackingColumn.TABLE_NAME, values, TrackingColumn.COLUMN_TRACKING_NUMBER + " = ?", new String[] {trackingNumber});
+        return db.update(TrackingColumn.TABLE_NAME, values, TrackingColumn.COLUMN_TRACKING_NUMBER + " = ?", new String[] { trackingNumber });
     }
 }

@@ -37,6 +37,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
@@ -63,6 +64,8 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     private PullableListView listView;
     private ActionBar actionBar;
     private EditText editText;
+
+    private int showType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +111,8 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         editText.setOnEditorActionListener(new AddTrackingEvent());
 
         dbHelper = new DatabaseHelper(this);
-        cursor = dbHelper.getAllTrackings();
+        cursor = dbHelper.getActiveTrackings();
+        showType = 0;
         String[] from = { TrackingColumn.COLUMN_CARRIER, TrackingColumn.COLUMN_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER };
         int[] to = { R.id.carrier, R.id.tracking_tag, R.id.tracking_number };
         adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
@@ -163,7 +167,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = customizeView(position, convertView, parent);
-                view.setBackgroundColor(getResources().getColor(R.color.peter_river));
+                view.setBackgroundColor(getResources().getColor(R.color.wet_asphalt));
                 return view;
             }
 
@@ -179,6 +183,22 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
             }
         };
         spinner.setAdapter(showTypeAdapter);
+        spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+            private boolean isFirst = true;
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (isFirst) {
+                    isFirst = false;
+                    return;
+                }
+                (new TrackingDBAsyncTask()).execute(new TrackingWithAction(null, Action.Switch));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -253,8 +273,16 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
                     dbHelper.archiveTracking(tracking.getTrackingNumber());
                 } else if (action == Action.Update) {
                     dbHelper.updateTrackingTag(tracking.getTrackingNumber(), tracking.getName());
+                } else if (action == Action.Switch) {
+                    Log.d(TAG, "switch show type " + showType);
+                    if (showType == 0) {
+                        showType = 1;
+                        return dbHelper.getArchiveTrackings();
+                    } else {
+                        showType = 0;
+                    }
                 }
-                cursor = dbHelper.getAllTrackings();
+                cursor = dbHelper.getActiveTrackings();
                 return cursor;
             }
             return null;

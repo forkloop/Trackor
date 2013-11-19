@@ -2,8 +2,8 @@ package us.forkloop.trackor.db;
 
 public class TrackingWithAction {
 
-    private Tracking tracking;
-    private Action action;
+    private final Tracking tracking;
+    private final Action action;
 
     public TrackingWithAction(Tracking tracking, Action action) {
         this.tracking = tracking;
@@ -19,6 +19,6 @@ public class TrackingWithAction {
     }
 
     public static enum Action {
-        Add, Archive, Update;
+        Add, Archive, Update, Switch;
     }
 }
