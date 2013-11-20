@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -64,7 +65,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(TrackingColumn.COLUMN_NAME, t.getName());
         values.put(TrackingColumn.COLUMN_TRACKING_NUMBER, t.getTrackingNumber());
         values.put(TrackingColumn.COLUMN_IS_DELETED, 0);
-        long id = db.insert(TrackingColumn.TABLE_NAME, null, values);
+        long id = -1;
+        try {
+            id = db.insertOrThrow(TrackingColumn.TABLE_NAME, null, values);
+        } catch (SQLiteException se) {
+            Log.e(TAG, "Error while inserting " + t + ": " + se);
+            values.remove(TrackingColumn.COLUMN_TRACKING_NUMBER);
+            db.update(TrackingColumn.TABLE_NAME, values, TrackingColumn.COLUMN_TRACKING_NUMBER + " = ?", new String[] { t.getTrackingNumber() });
+        }
         return id;
     }
 
