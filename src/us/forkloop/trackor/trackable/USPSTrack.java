@@ -23,7 +23,8 @@ import android.util.Xml;
 public class USPSTrack implements Trackable {
 
     private final String TAG = getClass().getSimpleName();
-    private final String TEMPLATE = "http://production.shippingapis.com/ShippingAPITest.dll?API=TrackV2&XML=%3CTrackRequest%20USERID=%22092TRACK3843%22%3E%3CTrackID%20ID=%22EJ958083578US%22%3E%3C/TrackID%3E%3C/TrackRequest%3E";
+    private final String TEMPLATE_BEFORE = "http://production.shippingapis.com/ShippingAPI.dll?API=TrackV2&XML=%3CTrackRequest%20USERID=%22092TRACK3843%22%3E%3CTrackID%20ID=%22";
+    private final String TEMPLATE_AFTER = "%22%3E%3C/TrackID%3E%3C/TrackRequest%3E";
     private static final Pattern PATTERN = Pattern.compile("^(.*am|pm)\\s(.*)\\s(\\d{5})\\.$");
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("MMM dd KK:mm aa");
 
@@ -32,7 +33,7 @@ public class USPSTrack implements Trackable {
         HttpURLConnection conn = null;
         try {
             Log.d(TAG, "fetching status for " + trackingNumber);
-            URL url = new URL(TEMPLATE);
+            URL url = new URL(TEMPLATE_BEFORE + trackingNumber + TEMPLATE_AFTER);
             conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(TIMEOUT);
             conn.setReadTimeout(TIMEOUT);
@@ -67,7 +68,8 @@ public class USPSTrack implements Trackable {
                 Log.d(TAG, detail);
                 Matcher matcher = PATTERN.matcher(detail);
                 String zipcode = "";
-                DateTime time = DateTime.now();
+                DateTime time = null;
+                String location = "";
                 String info = "";
                 if (matcher.find()) {
                     try {
@@ -78,9 +80,11 @@ public class USPSTrack implements Trackable {
                     }
                     info = matcher.group(2);
                     zipcode = matcher.group(3);
-                    Event event = new Event(time, "", zipcode, info);
-                    events.add(event);
+                } else {
+                    info = detail;
                 }
+                Event event = new Event(time, location, zipcode, info);
+                events.add(event);
             }
         }
         return events;

@@ -6,7 +6,7 @@ import us.forkloop.trackor.trackable.FedExTrack;
 import us.forkloop.trackor.trackable.LASERSHIPTrack;
 import us.forkloop.trackor.trackable.Trackable;
 import us.forkloop.trackor.trackable.UPSTrack;
-import us.forkloop.trackor.trackable.USPSHTMLTrack;
+import us.forkloop.trackor.trackable.USPSTrack;
 import us.forkloop.trackor.util.DetailTrackingAdapter;
 import us.forkloop.trackor.util.Event;
 import us.forkloop.trackor.util.SwipeReturnGesture;
@@ -162,14 +162,14 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
             Log.d(TAG, "Start to check status from " + carrier + " " + trackingNumber);
             Trackable trackable = null;
             if ("USPS".equals(carrier)) {
-                trackable = new USPSHTMLTrack();
+                // trackable = new USPSHTMLTrack();
+                trackable = new USPSTrack();
                 webUrl = USPS_WEB_URL + trackingNumber;
             } else if ("UPS".equals(carrier)) {
                 trackable = new UPSTrack();
                 webUrl = UPS_WEB_URL + trackingNumber;
             } else if ("FedEx".equals(carrier)) {
-                // need context to load template from asset folder
-                trackable = new FedExTrack(getApplicationContext());
+                trackable = new FedExTrack();
                 webUrl = FEDEX_WEB_URL + trackingNumber;
             } else if ("LASERSHIP".equals(carrier)) {
                 webUrl = LASERSHIP_WEB_URL + trackingNumber;

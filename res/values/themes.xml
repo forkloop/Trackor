@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="TrackorActionBarTheme"
-        parent="android:Theme.Holo.Light.DarkActionBar">
+        parent="android:Theme.Holo.Light">
         <item name="android:actionBarStyle">@style/TrackorActionBar</item>
     </style>
 
     <style name="TrackorActionBar"
         parent="android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@color/peter_river</item>
+        <item name="android:background">@color/wet_asphalt</item>
     </style>
 
     <style name="TrackorActionBarNoTitle"

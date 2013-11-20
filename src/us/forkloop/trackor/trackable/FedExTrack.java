@@ -1,87 +1,107 @@
 package us.forkloop.trackor.trackable;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import us.forkloop.trackor.util.Event;
-import android.content.Context;
 import android.util.Log;
 
+/**
+ * {@link http://www.hurl.it/}
+ */
 public class FedExTrack implements Trackable {
 
-    private final String TAG = getClass().getSimpleName();
-    private final String ENDPOINT = "https://wsbeta.fedex.com/xml";
-
-    private final Context context;
-
-    public FedExTrack(Context context) {
-        this.context = context;
-    }
+    private static final String TAG = "FedExTrack";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-ddHH:mm:ss");
+    private final String ENDPOINT = "https://www.fedex.com/trackingCal/track";
+    private final String PREFIX = "format=json&action=trackpackages&data=";
+    private final String TEMPLATE = "{\"TrackPackagesRequest\":{\"appType\":\"wtrk\",\"uniqueKey\":\"\""
+            + ",\"processingParameters\":{\"anonymousTransaction\":false,\"clientId\":\"WTRK\",\"returnDetailedErrors\":true,"
+            + "\"returnLocalizedDateTime\":false},\"trackingInfoList\":[{\"trackNumberInfo\":{\"trackingNumber\":\"%s\""
+            + ",\"trackingQualifier\":\"\",\"trackingCarrier\":\"\"}}]}}";
 
     @Override
     public List<Event> track(final String trackingNumber) {
-        String template = loadTemplate();
-        String mockTrackingNumber = "9612804882227374518306";
-        if (template != null) {
-            String body = String.format(template, mockTrackingNumber);
-            Log.d(TAG, body);
-
-            HttpURLConnection conn = null;
-            try {
-                URL url = new URL(ENDPOINT);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                conn.setConnectTimeout(TIMEOUT);
-                conn.setReadTimeout(TIMEOUT);
-                conn.setChunkedStreamingMode(0);
-                conn.setRequestMethod("POST");
-                OutputStream out = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-                writer.write(body);
-                writer.flush();
-                writer.close();
-                //
-                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    InputStream in = conn.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                    StringBuilder sb = new StringBuilder();
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line);
-                    }
-                    reader.close();
-                    return null;//sb.toString();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, e.toString());
-            } finally {
-                conn.disconnect();
+        HttpURLConnection conn = null;
+        InputStream in = null;
+        try {
+            final URL url = new URL(ENDPOINT);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            OutputStream out = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+            String data = URLEncoder.encode(String.format(TEMPLATE, trackingNumber), "utf-8");
+            writer.write(PREFIX + data);
+            writer.flush();
+            writer.close();
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                in = conn.getInputStream();
+                String response = IOUtils.toString(in);
+                return parse(response);
             }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ioe) {
+                }
+            }
+            conn.disconnect();
         }
         return null;
     }
 
-    private String loadTemplate() {
+    private List<Event> parse(final String response) {
         try {
-            InputStream in = context.getAssets().open("fedex.xml");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
+            JSONObject json = new JSONObject(response).getJSONObject("TrackPackagesResponse");
+            boolean isSuccess = json.getBoolean("successful");
+            if (isSuccess) {
+                JSONArray trackings = json.getJSONArray("packageList");
+                if (trackings.length() > 0) {
+                    JSONObject tracking = trackings.getJSONObject(0);
+                    JSONArray updates = tracking.getJSONArray("scanEventList");
+                    List<Event> events = new ArrayList<Event>();
+                    for (int n = 0; n < updates.length(); n++) {
+                        JSONObject scan = updates.getJSONObject(n);
+                        Log.d(TAG, "" + scan);
+                        String info = scan.optString("status");
+                        String location = scan.optString("scanLocation");
+                        String dateTime = scan.optString("date") + scan.optString("time");
+                        DateTime date = null;
+                        try {
+                            date = DateTime.parse(dateTime, FORMATTER);
+                        } catch (IllegalArgumentException iae) {
+                            Log.e(TAG, "Error while parse " + dateTime + ": " + date);
+                            continue;
+                        }
+                        Event event = new Event(date, location, null, info);
+                        events.add(event);
+                    }
+                    return events;
+                }
             }
-            reader.close();
-            return sb.toString();
-        } catch (IOException ioe) {
-            Log.e(TAG, ioe.toString());
+        } catch (JSONException je) {
+            Log.e(TAG, "Error while parsing response " + je);
         }
         return null;
     }

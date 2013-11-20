@@ -4,3 +4,4 @@ bin/
 gen/
 *-request.xml
 .DS_Store
+*.txt

@@ -21,8 +21,8 @@
         <item>LASERSHIP</item>
 	</string-array>
     <string-array name="show_type">
-        <item>ALL</item>
-        <item>ACTIVE</item>
+        <item>Active</item>
+        <item>Archive</item>
     </string-array>
 
     <string name="map_endpoint"></string>
