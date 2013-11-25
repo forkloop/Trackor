@@ -71,5 +71,8 @@
             <meta-data android:name="android.appwidget.provider"
                        android:resource="@xml/appwidget_info" />
         </receiver>
+        <receiver
+            android:name="us.forkloop.trackor.util.TrackorSyncReceiver">
+        </receiver>
     </application>
 </manifest>
