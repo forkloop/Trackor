@@ -1,6 +1,7 @@
 package us.forkloop.trackor.trackable;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -27,10 +28,13 @@ public class USPSTrack implements Trackable {
     private final String TEMPLATE_AFTER = "%22%3E%3C/TrackID%3E%3C/TrackRequest%3E";
     private static final Pattern PATTERN = Pattern.compile("^(.*am|pm)\\s(.*)\\s(\\d{5})\\.$");
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("MMM dd KK:mm aa");
+    private String response;
+    private boolean isDelivered;
 
     @Override
     public List<Event> track(final String trackingNumber) {
         HttpURLConnection conn = null;
+        InputStream in = null;
         try {
             Log.d(TAG, "fetching status for " + trackingNumber);
             URL url = new URL(TEMPLATE_BEFORE + trackingNumber + TEMPLATE_AFTER);
@@ -38,54 +42,75 @@ public class USPSTrack implements Trackable {
             conn.setConnectTimeout(TIMEOUT);
             conn.setReadTimeout(TIMEOUT);
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                InputStream in = conn.getInputStream();
+                in = conn.getInputStream();
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
                 StringBuilder sb = new StringBuilder();
                 String line;
                 while ((line = buffer.readLine()) != null) {
                     sb.append(line);
                 }
+                response = sb.toString();
                 buffer.close();
-                return parse(sb.toString());
+                return parse(response);
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ioe) {
+                }
+            }
             conn.disconnect();
         }
         return null;
     }
 
-    private List<Event> parse(String response) throws Exception {
+    @Override
+    public String rawStatus() {
+        return response;
+    }
+
+    @Override
+    public boolean isDelivered() {
+        return this.isDelivered;
+    }
+
+    @Override
+    public List<Event> parse(String response) {
         List<Event> events = new ArrayList<Event>();
 
         XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new StringReader(response));
-        while (parser.next() != XmlPullParser.END_DOCUMENT) {
-            if (parser.getEventType() == XmlPullParser.START_TAG
-                    && parser.getName().equals("TrackDetail")) {
-                String detail = parser.nextText();
-                Log.d(TAG, detail);
-                Matcher matcher = PATTERN.matcher(detail);
-                String zipcode = "";
-                DateTime time = null;
-                String location = "";
-                String info = "";
-                if (matcher.find()) {
-                    try {
-                        time = FORMATTER.parseDateTime(matcher.group(1));
-                    } catch (IllegalArgumentException e) {
-                        Log.e(TAG, "error while parsing date", e);
-                        continue;
+        try {
+            parser.setInput(new StringReader(response));
+            while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                if (parser.getEventType() == XmlPullParser.START_TAG
+                        && parser.getName().equals("TrackDetail")) {
+                    String detail = parser.nextText();
+                    Log.d(TAG, detail);
+                    Matcher matcher = PATTERN.matcher(detail);
+                    String zipcode = "";
+                    DateTime time = null;
+                    String location = "";
+                    String info = "";
+                    if (matcher.find()) {
+                        try {
+                            time = FORMATTER.parseDateTime(matcher.group(1));
+                        } catch (IllegalArgumentException e) {
+                            Log.e(TAG, "error while parsing date", e);
+                            continue;
+                        }
+                        info = matcher.group(2);
+                        zipcode = matcher.group(3);
+                    } else {
+                        info = detail;
                     }
-                    info = matcher.group(2);
-                    zipcode = matcher.group(3);
-                } else {
-                    info = detail;
+                    Event event = new Event(time, location, zipcode, info);
+                    events.add(event);
                 }
-                Event event = new Event(time, location, zipcode, info);
-                events.add(event);
             }
+        } catch (Exception e) {
         }
         return events;
     }

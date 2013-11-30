@@ -110,11 +110,11 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         editText.setImeActionLabel("Add", KeyEvent.KEYCODE_ENTER);
         editText.setOnEditorActionListener(new AddTrackingEvent());
 
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = DatabaseHelper.getInstance(getApplicationContext());
         cursor = dbHelper.getActiveTrackings();
         showType = 0;
-        String[] from = { TrackingColumn.COLUMN_CARRIER, TrackingColumn.COLUMN_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER };
-        int[] to = { R.id.carrier, R.id.tracking_tag, R.id.tracking_number };
+        String[] from = { TrackingColumn.COLUMN_CARRIER, TrackingColumn.COLUMN_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER, TrackingColumn.COLUMN_IS_DELIVERED };
+        int[] to = { R.id.carrier, R.id.tracking_tag, R.id.tracking_number, R.id.tracking_info };
         adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
@@ -237,14 +237,14 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
     @Override
     public void updateTracking(final String trackingNumber, final String newTag) {
         Log.d(TAG, "update tracking " + trackingNumber + ": " + newTag);
-        Tracking tracking = new Tracking(null, trackingNumber, newTag);
+        Tracking tracking = new Tracking(null, trackingNumber, newTag, false);
         TrackingWithAction trackingWithAction = new TrackingWithAction(tracking, Action.Update);
         (new TrackingDBAsyncTask()).execute(new TrackingWithAction[] { trackingWithAction });
     }
 
     @Override
     public void archiveTracking(final String trackingNumber) {
-        final Tracking tracking = new Tracking(null, trackingNumber, null);
+        final Tracking tracking = new Tracking(null, trackingNumber, null, false);
         TrackingWithAction trackingWithAction = new TrackingWithAction(tracking, Action.Archive);
         (new TrackingDBAsyncTask()).execute(new TrackingWithAction[] { trackingWithAction });
     }
@@ -293,10 +293,14 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent intent = new Intent(context, DetailActivity.class);
-            TextView tv = (TextView) view.findViewById(R.id.carrier);
-            intent.putExtra("carrier", tv.getText());
-            tv = (TextView) view.findViewById(R.id.tracking_number);
-            intent.putExtra("tnumber", tv.getText());
+            Cursor cursor = (Cursor) (adapter.getItem(position));
+            cursor.moveToFirst();
+            String trackingNumber = cursor.getString(cursor.getColumnIndex(TrackingColumn.COLUMN_TRACKING_NUMBER));
+            String carrier = cursor.getString(cursor.getColumnIndex(TrackingColumn.COLUMN_CARRIER));
+            String name = cursor.getString(cursor.getColumnIndex(TrackingColumn.COLUMN_NAME));
+            boolean isDelivered = cursor.getInt(cursor.getColumnIndex(TrackingColumn.COLUMN_IS_DELIVERED)) == 1 ? true : false;
+            Tracking tracking = new Tracking(carrier, trackingNumber, name, isDelivered);
+            intent.putExtra(DetailActivity.TRACKING, tracking);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, android.R.anim.slide_out_right);
         }

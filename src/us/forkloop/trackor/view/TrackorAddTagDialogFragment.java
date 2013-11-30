@@ -24,16 +24,16 @@ public class TrackorAddTagDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         edit = new EditText(getActivity());
         edit.setTypeface(app.getTypeface("Gotham-Book.otf"));
-        edit.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
         final String tag = getArguments().getString(PullableListView.TRACKING_TAG_KEY);
         if (tag != null) {
             edit.setText(tag);
         }
         DialogInterface.OnClickListener listener = new TrackorAddTagDialogClickListener();
         builder.setTitle(R.string.add_tag_dialog_title)
-               .setView(edit)
-               .setPositiveButton(android.R.string.ok, listener)
-               .setNegativeButton(android.R.string.cancel, listener);
+                .setView(edit)
+                .setPositiveButton(android.R.string.ok, listener)
+                .setNegativeButton(android.R.string.cancel, listener);
         return builder.create();
     }
 
@@ -50,9 +50,9 @@ public class TrackorAddTagDialogFragment extends DialogFragment {
                 String carrier = bundle.getString("carrier");
                 Log.d(TAG, "add new tracking " + carrier + ": " + trackingNumber + ": " + tag);
                 if (which == DialogInterface.BUTTON_POSITIVE) {
-                    tracking = new Tracking(carrier, trackingNumber, tag);
+                    tracking = new Tracking(carrier, trackingNumber, tag, false);
                 } else {
-                    tracking = new Tracking(carrier, trackingNumber, null);
+                    tracking = new Tracking(carrier, trackingNumber, null, false);
                 }
                 ((TrackorDBDelegate) getActivity()).addTracking(tracking);
             } else if ("update".equals(action)) {

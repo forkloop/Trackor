@@ -20,7 +20,7 @@ import android.util.Pair;
 
 /**
  * sample tracking number: 9261290100130056892383
- *
+ * 
  */
 public class USPSHTMLTrack implements Trackable {
 
@@ -29,6 +29,8 @@ public class USPSHTMLTrack implements Trackable {
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("MMMM d, yyyy , KK:mm aa");
     private static final DateTimeFormatter SIMPLE_FORMATTER = DateTimeFormat.forPattern("MMMM d, yyyy");
     private static final Pattern PATTERN = Pattern.compile("^(.*)\\s(\\d{5})");
+    private String response;
+    private boolean isDelivered;
 
     @Override
     public List<Event> track(String trackingNumber) {
@@ -62,6 +64,16 @@ public class USPSHTMLTrack implements Trackable {
         return null;
     }
 
+    @Override
+    public String rawStatus() {
+        return response;
+    }
+
+    @Override
+    public boolean isDelivered() {
+        return this.isDelivered;
+    }
+
     private DateTime extractDate(Elements dateElements) {
         if (dateElements != null && dateElements.size() > 0) {
             String text = dateElements.get(0).text();
@@ -74,7 +86,7 @@ public class USPSHTMLTrack implements Trackable {
             if (date == null) {
                 try {
                     date = SIMPLE_FORMATTER.parseDateTime(text.trim());
-                } catch(Exception e) {
+                } catch (Exception e) {
                     Log.e(TAG, "Error while parsing simple date " + text + ": " + e.getMessage());
                 }
             }
@@ -96,7 +108,7 @@ public class USPSHTMLTrack implements Trackable {
             Element element = locationElements.get(0);
             String text = element.text();
             try {
-                //FIXME still have whitespace after trim()
+                // FIXME still have whitespace after trim()
                 Log.d(TAG, "test ^" + text.trim() + "$");
                 Matcher matcher = PATTERN.matcher(text.trim());
                 if (matcher.find()) {
@@ -106,6 +118,11 @@ public class USPSHTMLTrack implements Trackable {
                 Log.d(TAG, "Error while extracting location " + text + ": " + e.getMessage());
             }
         }
+        return null;
+    }
+
+    @Override
+    public List<Event> parse(String response) {
         return null;
     }
 }

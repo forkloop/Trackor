@@ -2,6 +2,8 @@ package us.forkloop.trackor;
 
 import java.util.List;
 
+import us.forkloop.trackor.db.DatabaseHelper;
+import us.forkloop.trackor.db.Tracking;
 import us.forkloop.trackor.trackable.FedExTrack;
 import us.forkloop.trackor.trackable.LASERSHIPTrack;
 import us.forkloop.trackor.trackable.Trackable;
@@ -35,6 +37,7 @@ import android.widget.Toast;
 
 public class DetailActivity extends Activity implements SwipeReturnGesture.SwipeReturnGestureListener {
 
+    public static final String TRACKING = "tracking";
     private static final String TAG = "DetailActivity";
     private static final String ARCHIVE = "Archive";
     // FIXME width & height
@@ -44,22 +47,27 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
     private static final String USPS_WEB_URL = "https://tools.usps.com/go/TrackConfirmAction_input?origTrackNum=";
     private static final String FEDEX_WEB_URL = "https://www.fedex.com/fedextrack/?tracknumbers=";
 
+    private DatabaseHelper dbHelper;
     private SwipeReturnGesture gesture;
     private TrackorApp app;
     private ImageView map;
     private ProgressBar progressBar;
     private View defaultView;
 
+    Trackable trackable;
     private String webUrl;
     private String carrier;
     private String trackingNumber;
+    private boolean isDelivered;
     private boolean isChecking;
+    private Tracking tracking;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        dbHelper = DatabaseHelper.getInstance(getApplicationContext());
         progressBar = (ProgressBar) findViewById(R.id.progress);
 
         map = (ImageView) findViewById(R.id.map);
@@ -76,8 +84,10 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
         gesture = new SwipeReturnGesture(this, this);
 
         Intent intent = getIntent();
-        carrier = intent.getStringExtra("carrier");
-        trackingNumber = intent.getStringExtra("tnumber");
+        tracking = (Tracking) intent.getParcelableExtra(TRACKING);
+        carrier = tracking.getCarrier();
+        trackingNumber = tracking.getTrackingNumber();
+        isDelivered = tracking.isDelivered();
         check();
     }
 
@@ -150,6 +160,8 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
         protected void onPostExecute(List<Event> events) {
             if (events != null && events.size() > 0) {
                 renderSuccess(events);
+                // TODO separate thread?
+                updateDatabase();
             } else {
                 renderFailure();
             }
@@ -160,7 +172,6 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
         @Override
         protected List<Event> doInBackground(Void... args) {
             Log.d(TAG, "Start to check status from " + carrier + " " + trackingNumber);
-            Trackable trackable = null;
             if ("USPS".equals(carrier)) {
                 // trackable = new USPSHTMLTrack();
                 trackable = new USPSTrack();
@@ -178,7 +189,14 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
                 Log.e(TAG, "Unknown carrier " + carrier);
                 return null;
             }
-            List<Event> events = trackable.track(trackingNumber);
+            List<Event> events;
+            if (isDelivered) {
+                Log.i(TAG, "Already delivered, so read status from db.");
+                events = trackable.parse(dbHelper.getTrackingStatus(trackingNumber));
+            } else {
+                Log.i(TAG, "Not delivered yet, fetch status from some remote TCP/IP device.");
+                events = trackable.track(trackingNumber);
+            }
             return events;
         }
     }
@@ -214,6 +232,12 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
         tv.setText(ARCHIVE);
         listView.addFooterView(tv);
         listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, events));
+    }
+
+    private void updateDatabase() {
+        if (!isDelivered) { // if it is already delivered before, don't update status.
+            dbHelper.updateTrackingStatus(trackingNumber, trackable.isDelivered(), trackable.rawStatus());
+        }
     }
 
     @Override

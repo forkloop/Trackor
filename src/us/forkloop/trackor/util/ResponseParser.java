@@ -11,4 +11,6 @@ public interface ResponseParser {
     public String getEstimatedDeliveryDate();
 
     public String getDestination();
+
+    public boolean isDelivered();
 }

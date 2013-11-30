@@ -2,6 +2,7 @@ package us.forkloop.trackor.trackable;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -29,22 +30,26 @@ import android.util.Log;
 public class UPSTrack implements Trackable {
 
     private final String TAG = getClass().getSimpleName();
-
+    private static final String DELIVERED = "DELIVERED";
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyyMMddHHmmss");
     private final String ENDPOINT = "https://wwwcie.ups.com/ups.app/xml/Track";
     private final String TEMPLATE = "<?xml version=\"1.0\" ?><AccessRequest xml:lang='en-US'><AccessLicenseNumber>%s</AccessLicenseNumber>"
-                                    + "<UserId>%s</UserId><Password>%s</Password></AccessRequest>"
-                                    + "<TrackRequest><Request><TransactionReference></TransactionReference>"
-                                    + "<RequestAction>Track</RequestAction><RequestOption>Activity</RequestOption></Request>"
-                                    + "<TrackingNumber>%s</TrackingNumber></TrackRequest>";
+            + "<UserId>%s</UserId><Password>%s</Password></AccessRequest>"
+            + "<TrackRequest><Request><TransactionReference></TransactionReference>"
+            + "<RequestAction>Track</RequestAction><RequestOption>Activity</RequestOption></Request>"
+            + "<TrackingNumber>%s</TrackingNumber></TrackRequest>";
     private final String UPS_TOKEN = "ACBC1CC31858BAE6";
     private final String USER_ID = "forkloop";
     private final String PASSWORD = "Trackor4UPS";
+    private String response;
+    private boolean isDelivered;
+
     @Override
     public List<Event> track(final String trackingNumber) {
         String body = String.format(TEMPLATE, UPS_TOKEN, USER_ID, PASSWORD, trackingNumber);
         Log.d(TAG, "UPS request body: " + body);
         HttpURLConnection conn = null;
+        InputStream in = null;
         try {
             URL url = new URL(ENDPOINT);
             conn = (HttpURLConnection) url.openConnection();
@@ -60,7 +65,7 @@ public class UPSTrack implements Trackable {
             writer.close();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                InputStream in = conn.getInputStream();
+                in = conn.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 StringBuilder sb = new StringBuilder();
                 String line = null;
@@ -68,17 +73,35 @@ public class UPSTrack implements Trackable {
                     sb.append(line);
                 }
                 reader.close();
-                return parse(sb.toString());
+                response = sb.toString();
+                return parse(response);
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ioe) {
+                }
+            }
             conn.disconnect();
         }
         return null;
     }
 
-    private List<Event> parse(final String response) {
+    @Override
+    public String rawStatus() {
+        return response;
+    }
+
+    @Override
+    public boolean isDelivered() {
+        return this.isDelivered;
+    }
+
+    @Override
+    public List<Event> parse(final String response) {
         List<Event> events = new ArrayList<Event>();
         Log.d(TAG, response);
         try {
@@ -106,9 +129,15 @@ public class UPSTrack implements Trackable {
                             zipcode = postalCode.item(0).getTextContent();
                         }
                         String info = "";
-                        NodeList description = activity.getElementsByTagName("Description");
-                        if (description.getLength() > 0) {
-                            info = description.item(0).getTextContent();
+                        NodeList stausDescription = activity.getElementsByTagName("Status");
+                        if (stausDescription.getLength() > 0) {
+                            NodeList description = ((Element) stausDescription.item(0)).getElementsByTagName("Description");
+                            if (description.getLength() > 0) {
+                                info = description.item(0).getTextContent();
+                                if (DELIVERED.equals(info)) {
+                                    isDelivered = true;
+                                }
+                            }
                         }
                         StringBuilder datetime = new StringBuilder();
                         NodeList date = activity.getElementsByTagName("Date");

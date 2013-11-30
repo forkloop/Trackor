@@ -35,6 +35,8 @@ public class FedExTrack implements Trackable {
             + ",\"processingParameters\":{\"anonymousTransaction\":false,\"clientId\":\"WTRK\",\"returnDetailedErrors\":true,"
             + "\"returnLocalizedDateTime\":false},\"trackingInfoList\":[{\"trackNumberInfo\":{\"trackingNumber\":\"%s\""
             + ",\"trackingQualifier\":\"\",\"trackingCarrier\":\"\"}}]}}";
+    private String response;
+    private boolean isDelivered;
 
     @Override
     public List<Event> track(final String trackingNumber) {
@@ -54,7 +56,7 @@ public class FedExTrack implements Trackable {
             writer.close();
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 in = conn.getInputStream();
-                String response = IOUtils.toString(in);
+                response = IOUtils.toString(in);
                 return parse(response);
             }
         } catch (Exception e) {
@@ -71,7 +73,18 @@ public class FedExTrack implements Trackable {
         return null;
     }
 
-    private List<Event> parse(final String response) {
+    @Override
+    public String rawStatus() {
+        return response;
+    }
+
+    @Override
+    public boolean isDelivered() {
+        return this.isDelivered;
+    }
+
+    @Override
+    public List<Event> parse(final String response) {
         try {
             JSONObject json = new JSONObject(response).getJSONObject("TrackPackagesResponse");
             boolean isSuccess = json.getBoolean("successful");
