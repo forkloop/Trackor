@@ -73,6 +73,7 @@ public class SettingsFragment extends PreferenceFragment {
     private void toggleAutoSync(boolean status, ListPreference freqPreference) {
         AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(getActivity(), TrackorSyncReceiver.class);
+        intent.setAction(TrackorSyncReceiver.ACTION);
         final String freq = freqPreference.getValue(); // in minutes
         intent.putExtra(AUTO_SYNC_FREQ, freq);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), ALARM_REQUEST_CODE, intent, PendingIntent.FLAG_ONE_SHOT);

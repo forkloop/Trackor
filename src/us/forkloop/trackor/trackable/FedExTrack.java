@@ -27,6 +27,7 @@ import android.util.Log;
  */
 public class FedExTrack implements Trackable {
 
+    private static final String DELIVERED = "true";
     private static final String TAG = "FedExTrack";
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-ddHH:mm:ss");
     private final String ENDPOINT = "https://www.fedex.com/trackingCal/track";
@@ -97,6 +98,10 @@ public class FedExTrack implements Trackable {
                     for (int n = 0; n < updates.length(); n++) {
                         JSONObject scan = updates.getJSONObject(n);
                         Log.d(TAG, "" + scan);
+                        String deliveryStatus = scan.optString("isDelivered");
+                        if (DELIVERED.equals(deliveryStatus)) {
+                            isDelivered = true;
+                        }
                         String info = scan.optString("status");
                         String location = scan.optString("scanLocation");
                         String dateTime = scan.optString("date") + scan.optString("time");
