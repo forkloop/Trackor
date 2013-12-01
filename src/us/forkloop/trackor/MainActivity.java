@@ -54,6 +54,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
 
     final int TRACKING_NAME_COLUMN_INDEX = 1;
     final int TRACKING_CARRIER_COLUMN_INDEX = 2;
+    final int TRACKING_STATUS_COLUMN_INDEX = 4;
     private DatabaseHelper dbHelper;
     private Cursor cursor;
     SimpleCursorAdapter adapter;
@@ -114,7 +115,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         cursor = dbHelper.getActiveTrackings();
         showType = 0;
         String[] from = { TrackingColumn.COLUMN_CARRIER, TrackingColumn.COLUMN_NAME, TrackingColumn.COLUMN_TRACKING_NUMBER, TrackingColumn.COLUMN_IS_DELIVERED };
-        int[] to = { R.id.carrier, R.id.tracking_tag, R.id.tracking_number, R.id.tracking_info };
+        int[] to = { R.id.carrier, R.id.tracking_tag, R.id.tracking_number, R.id.tracking_status };
         adapter = new SimpleCursorAdapter(this, R.layout.action_overlay, cursor, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         adapter.setViewBinder(new TrackingViewBinder());
         listView.setAdapter(adapter);
@@ -330,6 +331,9 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
                 } else {
                     view.setBackgroundColor(Color.parseColor("#9b59b6"));
                 }
+            }
+            if (columnIndex == TRACKING_STATUS_COLUMN_INDEX) {
+                view.setBackgroundColor(getResources().getColor(R.color.emerald));
             }
             return true;
         }
