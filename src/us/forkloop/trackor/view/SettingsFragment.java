@@ -64,7 +64,7 @@ public class SettingsFragment extends PreferenceFragment {
         syncFreq.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                updateAutoSync((String) newValue, syncFreq);
+                updateAutoSync((String) newValue);
                 return true;
             }
         });
@@ -84,11 +84,13 @@ public class SettingsFragment extends PreferenceFragment {
         }
     }
 
-    private void updateAutoSync(String freq, ListPreference freqPreference) {
+    private void updateAutoSync(String freq) {
         Log.d(TAG, "new auto sync freq " + freq);
-        // AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-        // Intent intent = new Intent(getActivity(), StockSyncReceiver.class);
-        // PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), ALARM_REQUEST_CODE, intent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getActivity(), TrackorSyncReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), ALARM_REQUEST_CODE, intent, PendingIntent.FLAG_ONE_SHOT);
+        alarmManager.cancel(pendingIntent);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME, Integer.parseInt(freq) * 60000L, pendingIntent);
     }
 
     private class PreferenceClickListener implements Preference.OnPreferenceClickListener {

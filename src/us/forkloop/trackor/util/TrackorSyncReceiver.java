@@ -1,5 +1,14 @@
 package us.forkloop.trackor.util;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import us.forkloop.trackor.db.DatabaseHelper;
 import us.forkloop.trackor.db.Tracking.TrackingColumn;
 import us.forkloop.trackor.trackable.FedExTrack;
@@ -16,7 +25,10 @@ import android.util.Log;
 public class TrackorSyncReceiver extends BroadcastReceiver {
 
     public static final String ACTION = "us.forkloop.trackor.UPDATE_TRACKINGS";
+    private static final int THREADS_NUM = 2;
+    private static final int POLL_TIMEOUT = 60;
     private static final String TAG = "TrackorSyncReceiver";
+    DatabaseHelper dbHelper;
     private int deliveredCount = 0;
 
     @Override
@@ -35,12 +47,44 @@ public class TrackorSyncReceiver extends BroadcastReceiver {
     }
 
     private void update(Context context) {
-        DatabaseHelper dbHelper = DatabaseHelper.getInstance(context);
+        dbHelper = DatabaseHelper.getInstance(context);
         Cursor cursor = dbHelper.getActiveOnTheWayTrackings();
         Log.i(TAG, "Ready to update status for " + cursor.getCount() + " trackings.");
+        ExecutorService executors = Executors.newFixedThreadPool(THREADS_NUM);
+        CompletionService<Boolean> service = new ExecutorCompletionService<Boolean>(executors);
+        int count = 0;
         while (cursor.moveToNext()) {
             String carrier = cursor.getString(cursor.getColumnIndex(TrackingColumn.COLUMN_CARRIER));
             String trackingNumber = cursor.getString(cursor.getColumnIndex(TrackingColumn.COLUMN_TRACKING_NUMBER));
+            service.submit(new UpdateCallable(carrier, trackingNumber));
+            count++;
+        }
+        for (int n = 0; n < count; n++) {
+            try {
+                Future<Boolean> result = service.poll(POLL_TIMEOUT, TimeUnit.SECONDS);
+                if (result.get()) {
+                    deliveredCount++;
+                }
+            } catch (InterruptedException ie) {
+                Log.e(TAG, "interrputed while updating " + ie);
+            } catch (ExecutionException ee) {
+                Log.e(TAG, "error while getting update status " + ee);
+            }
+        }
+        executors.shutdown();
+    }
+
+    private class UpdateCallable implements Callable<Boolean> {
+        private final String carrier;
+        private final String trackingNumber;
+
+        public UpdateCallable(String carrier, String trackingNumber) {
+            this.carrier = carrier;
+            this.trackingNumber = trackingNumber;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
             Trackable trackable = null;
             if ("LASERSHIP".equals(carrier)) {
                 trackable = new LASERSHIPTrack();
@@ -53,9 +97,7 @@ public class TrackorSyncReceiver extends BroadcastReceiver {
             }
             trackable.track(trackingNumber);
             dbHelper.updateTrackingStatus(trackingNumber, trackable.isDelivered(), trackable.rawStatus());
-            if (trackable.isDelivered()) {
-                deliveredCount++;
-            }
+            return trackable.isDelivered();
         }
     }
 }

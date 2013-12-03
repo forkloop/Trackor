@@ -28,6 +28,7 @@ public class USPSTrack implements Trackable {
     private final String TEMPLATE_AFTER = "%22%3E%3C/TrackID%3E%3C/TrackRequest%3E";
     private static final Pattern PATTERN = Pattern.compile("^(.*am|pm)\\s(.*)\\s(\\d{5})\\.$");
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("MMM dd KK:mm aa");
+    private static final String DELIVERED = "Delivered";
     private String response;
     private boolean isDelivered;
 
@@ -105,6 +106,9 @@ public class USPSTrack implements Trackable {
                         zipcode = matcher.group(3);
                     } else {
                         info = detail;
+                    }
+                    if (info.contains(DELIVERED)) {
+                        isDelivered = true;
                     }
                     Event event = new Event(time, location, zipcode, info);
                     events.add(event);

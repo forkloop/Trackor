@@ -36,14 +36,16 @@
     <string name="pref_sync_freq_sum">Choose the sync frequencey.</string>
     <string name="pref_sync_freq_default">60</string>
     <string-array name="pref_sync_freq_list_key">
-        <item>10 minutes</item>
         <item>30 minutes</item>
-        <item>1 hour</item>
+        <item>60 minutes</item>
+        <item>2 hours</item>
+        <item>6 hours</item>
     </string-array>
     <string-array name="pref_sync_freq_list_value">
-        <item>10</item>
         <item>30</item>
         <item>60</item>
+        <item>120</item>
+        <item>360</item>
     </string-array>
 
     <string name="pref_about_cat_title">About</string>
