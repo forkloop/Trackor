@@ -333,7 +333,12 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
                 }
             }
             if (columnIndex == TRACKING_STATUS_COLUMN_INDEX) {
-                view.setBackgroundColor(getResources().getColor(R.color.emerald));
+                boolean isDelivered = cursor.getInt(columnIndex) == 1 ? true : false;
+                if (isDelivered) {
+                    view.setBackgroundColor(getResources().getColor(R.color.emerald));
+                } else {
+                    view.setBackgroundColor(getResources().getColor(R.color.carrot));
+                }
             }
             return true;
         }

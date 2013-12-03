@@ -115,6 +115,7 @@ public class USPSTrack implements Trackable {
                 }
             }
         } catch (Exception e) {
+            Log.e(TAG, "Error while parsing USPS response " + response);
         }
         return events;
     }
