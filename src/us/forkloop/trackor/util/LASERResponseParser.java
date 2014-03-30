@@ -50,7 +50,7 @@ public class LASERResponseParser implements ResponseParser {
             Event event = new Event(time, location, zipcode, info);
             events.add(event);
             // check deliver status
-            if ("Released".equals(eventType)) {
+            if ("Released".equals(eventType) || "Delivered".equals(eventType)) {
                 isDelivered = true;
             }
         }
