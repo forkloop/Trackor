@@ -294,8 +294,7 @@ public class MainActivity extends Activity implements QuickReturn, TrackorDBDele
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent intent = new Intent(context, DetailActivity.class);
-            Cursor cursor = (Cursor) (adapter.getItem(position));
-            cursor.moveToFirst();
+            Cursor cursor = (Cursor) (adapter.getItem(position - 1));
             String trackingNumber = cursor.getString(cursor.getColumnIndex(TrackingColumn.COLUMN_TRACKING_NUMBER));
             String carrier = cursor.getString(cursor.getColumnIndex(TrackingColumn.COLUMN_CARRIER));
             String name = cursor.getString(cursor.getColumnIndex(TrackingColumn.COLUMN_NAME));
