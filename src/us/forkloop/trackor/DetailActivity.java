@@ -62,6 +62,8 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
     private boolean isChecking;
     private Tracking tracking;
 
+    private boolean hasFooterView = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -226,11 +228,14 @@ public class DetailActivity extends Activity implements SwipeReturnGesture.Swipe
         (new GetMapTask()).execute(url);
 
         ListView listView = (ListView) findViewById(R.id.detail_tracking_list);
-        TextView tv = (TextView) getLayoutInflater().inflate(R.layout.typefaced_textview, null);
-        tv.setBackgroundColor(Color.parseColor("#c0392b"));
-        tv.setTextColor(Color.WHITE);
-        tv.setText(ARCHIVE);
-        listView.addFooterView(tv);
+        if (!hasFooterView) {
+            hasFooterView = true;
+            TextView tv = (TextView) getLayoutInflater().inflate(R.layout.typefaced_textview, null);
+            tv.setBackgroundColor(Color.parseColor("#c0392b"));
+            tv.setTextColor(Color.WHITE);
+            tv.setText(ARCHIVE);
+            listView.addFooterView(tv);
+        }
         listView.setAdapter(new DetailTrackingAdapter(this, R.layout.detail_tracking_record, events));
     }
 
